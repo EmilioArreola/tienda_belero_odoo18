@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="test_template" name="Página de Prueba de JS">
+        <t t-set="web_assets_full" t="True"/>
+        <t t-call="website.layout">
+            <div id="wrap" class="container">
+                <h1 class="mt-5">Página de Prueba</h1>
+                <p>Si los assets de Odoo se cargan correctamente, deberías ver una alerta de JavaScript al cargar esta página.</p>
+            </div>
+        </t>
+    </template>
+
+    <record id="test_page_record" model="website.page">
+        <field name="name">Página de Prueba</field>
+        <field name="website_published">True</field>
+        <field name="url">/test</field>
+        <field name="view_id" ref="recetas.test_template"/>
+    </record>
+</odoo>

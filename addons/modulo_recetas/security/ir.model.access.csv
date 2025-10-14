@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_receta_receta_user,receta.receta.user,model_receta_receta,base.group_user,1,1,1,1
+access_receta_receta_public,receta.receta.public,model_receta_receta,base.group_public,1,0,0,0
+access_receta_categoria_user,receta.categoria.user,model_receta_categoria,base.group_user,1,1,1,1
+access_receta_ingrediente_user,receta.ingrediente.user,model_receta_ingrediente,base.group_user,1,1,1,1
+access_receta_categoria_public,receta.categoria.public,model_receta_categoria,base.group_public,1,0,0,0
+access_receta_ingrediente_public,receta.ingrediente.public,model_receta_ingrediente,base.group_public,1,0,0,0
+access_receta_ingrediente_linea_user,receta.ingrediente.linea.user,model_receta_ingrediente_linea,base.group_user,1,1,1,1

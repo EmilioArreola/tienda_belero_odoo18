@@ -1,0 +1,9 @@
+.badge-ingrediente {
+    background-color: #ea6437 !important;
+    color: #ffffff !important;
+}
+
+.badge-categoria {
+    background-color: #FFCD57 !important; /* Un color turquesa/verde */
+    color: #333333 !important;
+}

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="receta_receta_kanban_view" model="ir.ui.view">
+            <field name="name">receta.receta.kanban</field>
+            <field name="model">receta.receta</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <field name="name"/>
+                    <field name="descripcion_corta"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <div class="oe_kanban_details">
+                                    <strong><field name="name"/></strong>
+                                    <p class="mt-2"><field name="descripcion_corta"/></p>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="receta_receta_form_view" model="ir.ui.view">
+            <field name="name">receta.receta.form</field>
+            <field name="model">receta.receta</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Ej: Pastel de Chocolate"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <field name="descripcion_corta"/>
+                        </group>
+                        <notebook>
+                            <page string="Ingredientes">
+                                <field name="ingredientes"/>
+                            </page>
+                            <page string="Instrucciones">
+                                <field name="instrucciones"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="receta_receta_action" model="ir.actions.act_window">
+            <field name="name">Recetas de Cocina</field>
+            <field name="res_model">receta.receta</field>
+            <field name="view_mode">kanban,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    ¡Crea tu primera receta!
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_recetas_root" name="Recetario"/>
+        <menuitem id="menu_recetas_recetas"
+                  name="Recetas"
+                  parent="menu_recetas_root"
+                  action="receta_receta_action"/>
+
+    </data>
+</odoo>

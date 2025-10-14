@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="_recetas_galeria_content" name="Contenido de la Galería de Recetas">
+        <div class="container my-5">
+            <h2 class="text-center mb-5">Nuestras Recetas 🍳</h2>
+            <t t-set="recetas" t-value="request.env['recetas.receta'].search([('active', '=', True)])"/>
+            <div class="row" id="recetas_gallery">
+                <t t-if="recetas">
+                    <t t-foreach="recetas" t-as="receta">
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card shadow-sm h-100 ver-receta" style="cursor: pointer;" t-att-data-id="receta.id">
+                                <img t-attf-src="/web/image/recetas.receta/{{receta.id}}/imagen_preview" class="card-img-top" style="height: 200px; object-fit: cover;" t-att-alt="receta.name"/>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title"><t t-esc="receta.name"/></h5>
+                                    <p class="card-text text-muted flex-grow-1"><t t-esc="receta.descripcion_corta or ''"/></p>
+                                    <a href="#" class="btn btn-sm btn-outline-primary mt-auto">Ver detalles</a>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                <t t-else="">
+                    <div class="col-12 text-center">
+                        <p class="alert alert-info">¡Pronto publicaremos nuevas recetas! Vuelve a visitarnos.</p>
+                    </div>
+                </t>
+            </div>
+        </div>
+        <div class="modal fade" id="modalReceta" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalRecetaTitulo">Cargando...</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                            <span aria-hidden="true">&#215;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modalRecetaContenido"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="recetas_galeria_template" name="Página de Galería de Recetas">
+        <t t-set="web_assets_full" t="True"/>
+        <t t-call="website.layout">
+            <div id="wrap">
+                <t t-call="recetas._recetas_galeria_content"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="recetas_snippet" name="Galería de Recetas Snippet">
+        <section class="s_recetas_gallery">
+            <t t-call="recetas._recetas_galeria_content"/>
+        </section>
+    </template>
+
+    <record id="recetas.snippet_recetas_gallery" model="ir.ui.view">
+        <field name="name">Snippet Galería de Recetas</field>
+        <field name="type">qweb</field>
+        <field name="key">website.snippets</field>
+        <field name="arch" type="xml">
+            <t t-snippet="recetas.recetas_snippet"
+               t-thumbnail="/recetas/static/src/img/snippet_icon.png"/>
+        </field>
+    </record>
+
+    <!--record id="recetas_gallery_page" model="website.page">
+        <field name="name">Galería de Recetas</field>
+        <field name="website_published">True</field>
+        <field name="url">/recetas</field>
+        <field name="view_id" ref="recetas.recetas_galeria_template"/>
+    </record-->
+</odoo>

@@ -3,13 +3,18 @@
 import { patch } from "@web/core/utils/patch";
 import { UserMenu } from "@web/webclient/user_menu/user_menu";
 
-patch(UserMenu.prototype, "hide_user_menu_items", {
-    /**
-     * Filtra los elementos del menú antes de mostrarlos.
-     */
+patch(UserMenu, {
+    
     async getElements() {
         const elements = await this._super(...arguments);
-        // Filtramos los elementos que no queremos mostrar
+        
+        // --- INICIO DE DEBUG ---
+        // Esto imprimirá todos los elementos del menú en la consola
+        // para que podamos ver sus IDs reales.
+        console.log("ELEMENTOS DEL MENÚ DE USUARIO:", elements);
+        // --- FIN DE DEBUG ---
+
+        // Dejamos la lógica de filtrado original
         return elements.filter(
             (el) => !["documentation", "support", "about"].includes(el.id)
         );

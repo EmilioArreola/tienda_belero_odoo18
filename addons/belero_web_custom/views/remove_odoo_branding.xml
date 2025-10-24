@@ -1,31 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<templates id="template" xml:space="preserve">
-
-    <!-- Heredar la plantilla original -->
-    <t t-extend="web.UserMenu">
-        <t t-jquery="t[t-foreach='getElements()']" t-operation="replace">
-            <t t-foreach="getElements()" t-as="element" t-key="element_index">
-                <!-- Mostramos solo los elementos que no sean documentación, soporte o acerca de -->
-                <t t-if="element.id not in ['documentation', 'support', 'about'] and not element.hide">
-                    <DropdownItem
-                        t-if="element.type == 'item' or element.type == 'switch'"
-                        attrs="{ href: element.href, 'data-menu': element.id }"
-                        onSelected="element.callback"
-                    >
-                        <div class="d-flex justify-content-between p-0 w-100">
-                            <t t-out="element.description"/>
-                            <CheckBox
-                                t-if="element.type == 'switch'"
-                                value="element.isChecked"
-                                className="'form-switch ms-2'"
-                                onChange="element.callback"
-                            />
-                        </div>
-                    </DropdownItem>
-                    <div t-if="element.type == 'separator'" role="separator" class="dropdown-divider"/>
-                </t>
-            </t>
-        </t>
-    </t>
-
-</templates>
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="webclient_bootstrap_inherit" inherit_id="web.webclient_bootstrap">
+        <xpath expr="//t[@t-set='head_web']" position="inside">
+            <style type="text/css">
+                /* Ocultar Documentación */
+                .o_menu_systray .o_user_menu a[data-menu="documentation"],
+                .o_menu_systray .dropdown-menu a[href*="documentation"],
+                nav.o_main_navbar a[href*="documentation"] {
+                    display: none !important;
+                }
+                
+                /* Ocultar Soporte */
+                .o_menu_systray .o_user_menu a[data-menu="support"],
+                .o_menu_systray .dropdown-menu a[href*="support"],
+                nav.o_main_navbar a[href*="support"] {
+                    display: none !important;
+                }
+                
+                /* Ocultar Mi cuenta de Odoo.com */
+                .o_menu_systray .o_user_menu a[href*="odoo.com/my"],
+                .o_menu_systray .dropdown-menu a[href*="odoo.com"],
+                nav.o_main_navbar a[href*="odoo.com/my"],
+                .dropdown-item[href*="/odoo_account"] {
+                    display: none !important;
+                }
+            </style>
+        </xpath>
+    </template>
+</odoo>

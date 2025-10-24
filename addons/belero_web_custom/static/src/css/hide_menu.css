@@ -1,0 +1,31 @@
+/* Documentación */
+.o_user_menu a[data-menu="documentation"],
+.dropdown-menu a[href*="documentation"] {
+    display: none !important;
+}
+
+ /* Soporte - TODAS las variantes */
+.o_user_menu a[data-menu="support"],
+.dropdown-menu a[href*="support"],
+.o-dropdown-item[data-menu="support"],
+span.o-dropdown-item[data-menu="support"],
+.dropdown-item[data-menu="support"],
+/* Por si es un div en lugar de link */
+.dropdown-menu div:contains("Soporte"),
+.o-dropdown-item div:contains("Soporte"),
+/* Por clase completa */
+.d-flex.justify-content-between.p-0.w-100 div:contains("Soporte") {
+    display: none !important;
+}
+
+/* Mi cuenta de Odoo.com - REGLA EXACTA */
+.o-dropdown-item[data-menu="account"],
+span.o-dropdown-item[data-menu="account"],
+.dropdown-item[data-menu="account"] {
+    display: none !important;
+}
+
+/* Alternativa por clase específica */
+span.o-dropdown-item.dropdown-item.o-navigable[data-menu="account"] {
+    display: none !important;
+}

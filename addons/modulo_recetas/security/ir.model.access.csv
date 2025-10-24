@@ -6,3 +6,8 @@ access_receta_ingrediente_user,receta.ingrediente.user,model_receta_ingrediente,
 access_receta_categoria_public,receta.categoria.public,model_receta_categoria,base.group_public,1,0,0,0
 access_receta_ingrediente_public,receta.ingrediente.public,model_receta_ingrediente,base.group_public,1,0,0,0
 access_receta_ingrediente_linea_user,receta.ingrediente.linea.user,model_receta_ingrediente_linea,base.group_user,1,1,1,1
+
+access_receta_receta_portal,receta.receta.portal,model_receta_receta,base.group_portal,1,0,0,0
+access_receta_categoria_portal,receta.categoria.portal,model_receta_categoria,base.group_portal,1,0,0,0
+access_receta_ingrediente_portal,receta.ingrediente.portal,model_receta_ingrediente,base.group_portal,1,0,0,0
+access_receta_ingrediente_linea_portal,receta.ingrediente.linea.portal,model_receta_ingrediente_linea,base.group_portal,1,0,0,0

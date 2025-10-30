@@ -55,9 +55,13 @@
                     <div class="d-flex justify-content-center">
                         <t t-call="website.pager" t-options="{'pager': pager}"/>
                     </div>
-                    </div>
+                </div>
             </t>
         </template>
+
+        <!-- ========================================================= -->
+        <!-- DETALLE DE RECETA CON BOTÓN PDF DEBAJO DE LAS CATEGORÍAS -->
+        <!-- ========================================================= -->
 
         <template id="pagina_receta_detalle" name="Detalle de Receta">
             <t t-call="website.layout">
@@ -92,7 +96,7 @@
                             <h3>Ingredientes</h3>
                             <div t-field="receta.ingredientes_cantidades"/>
 
-                           <div t-if="receta.ingrediente_ids" class="mt-4">
+                            <div t-if="receta.ingrediente_ids" class="mt-4">
                                 <h4 class="mb-2">Productos en esta receta</h4>
                                 <t t-foreach="receta.ingrediente_ids" t-as="ingrediente">
                                     <a t-if="ingrediente.product_id" 
@@ -107,12 +111,21 @@
                                 </t>
                             </div>
 
-                           <div t-if="receta.categoria_ids" class="mt-4">
+                            <div t-if="receta.categoria_ids" class="mt-4">
                                 <h4 class="mb-2">Categorías</h4>
                                 <t t-foreach="receta.categoria_ids" t-as="categoria">
                                     <span class="badge px-3 py-2 mr-1 mb-1 badge-categoria" t-esc="categoria.name"/>
                                 </t>
                             </div>
+
+                            <!-- 🔽 NUEVO BOTÓN DE DESCARGA PDF -->
+                            <div class="text-center mt-4">
+                                <a t-attf-href="/recetas/{{ receta.id }}/pdf"
+                                   class="btn btn-outline-primary btn-lg">
+                                    <i class="fa fa-file-pdf-o mr-2"/> Descargar receta en PDF
+                                </a>
+                            </div>
+                            <!-- 🔼 FIN BOTÓN PDF -->
                         </div>
                     </div>
 
@@ -129,6 +142,7 @@
             </t>
         </template>
 
+        <!-- Menú en el sitio web -->
         <record id="menu_recetas_website" model="website.menu">
             <field name="name">Recetas</field>
             <field name="url">/recetas</field>

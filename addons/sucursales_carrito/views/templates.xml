@@ -27,7 +27,7 @@
             </div>
             </xpath>
 
-        <xpath expr="//t[@groups='!account.group_delivery_invoice_address']/t[@t-call='website_sale.delivery_form']" position="after">
+        <xpath expr="//t[@groups='!account.group_delivery_invoice_address'][@t-call='website_sale.delivery_form']" position="after">
             
              <div class="mb-3 d-none" id="sucursal_picker_wrapper_2">
                 <h4 class="o_page_header mt-4">ELIJA LA SUCURSAL</h4>
@@ -37,6 +37,14 @@
                         <select name="sucursal_recogida" class="form-select" id="sucursal_select_2">
                             <option value="" selected="1">Seleccione una sucursal...</option>
                             <option value="Escuadrón 201 #300, Antiguo Aereopuerto">Escuadrón 201 #300, Antiguo Aereopuerto</option>
+                            <option value="Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía">Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía</option>
+                            <option value="Calle Cosijoeza, #216-A esq. con Calzada de la República, Barrio de Jalatlaco, Oaxaca">Calle Cosijoeza, #216-A esq. con Calzada de la República, Barrio de Jalatlaco, Oaxaca</option>
+                            <option value="Eucaliptos #215 В, Col. Reforma, 68050">Eucaliptos #215 В, Col. Reforma, 68050</option>
+                            <option value="Libramiento Riveras del Atoyac #122-2, Esq. Pinos Col. Eucaliptos">Libramiento Riveras del Atoyac #122-2, Esq. Pinos Col. Eucaliptos</option>
+                            <option value="Díaz Ordaz #710, Col. Centro">Díaz Ordaz #710, Col. Centro</option>
+                            <option value="Av. Eduardo Mata #2302, Periférico">Av. Eduardo Mata #2302, Periférico</option>
+                            <option value="Carretera Cristóbal Colón #202, Santa Rosa">Carretera Cristóbal Colón #202, Santa Rosa</option>
+                            <option value="Calle Yagul esq. Cosijopi #122-A">Calle Yagul esq. Cosijopi #122-A</option>
                             <option value="Vicente Guerrero, Centro, Oaxaca">Vicente Guerrero, Centro, Oaxaca</option>
                         </select>
                     </div>

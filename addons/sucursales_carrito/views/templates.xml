@@ -2,7 +2,7 @@
 <odoo>
     <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
         
-        <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="replace">
+        <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="after">
             
             <div class="mb-3 d-none" id="sucursal_picker_wrapper">
                 <h4 class="fs-6 small text-uppercase fw-bolder">SELECCIONE LA SUCURSAL DONDE RECOGERÁ SU PEDIDO</h4>

@@ -3,8 +3,7 @@
     'name': "Sucursales Carrito (Checkout)",
     'summary': """
         Agrega un selector de sucursales en el checkout 
-        cuando se elige 'Recoger en tiendaaa aa'.""",
-    'author': "CAAB",
+        cuando se elige 'Recoger en tienda Vol 2.0'.""",
     'version': '1.0',
     'category': 'Website/eCommerce',
     'depends': [

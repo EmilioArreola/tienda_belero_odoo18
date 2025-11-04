@@ -3,7 +3,7 @@
     'name': "Sucursales Carrito (Checkout)",
     'summary': """
         Agrega un selector de sucursales en el checkout 
-        cuando se elige 'Recoger en tienda ESTA ES LA VERSION 2                                                            '.""",
+        cuando se elige 'Recoger en tienda' vol 2.0.""",
     'version': '1.0',
     'category': 'Website/eCommerce',
     'depends': [
@@ -14,14 +14,13 @@
     ],
     
     # --- INICIO DE LA CORRECCIÓN ---
-    # Cambiamos cómo se registran los assets
     'assets': {
         'web.assets_frontend': [
-            # Usamos una tupla para definir el orden de carga:
-            # (posición, archivo_de_referencia, mi_archivo)
             (
                 'after',
-                'web/static/src/js/public/public_widget.js',
+                # ESTA ES LA LÍNEA QUE CAMBIAMOS:
+                # Usamos un archivo de website_sale como ancla, es más seguro.
+                'website_sale/static/src/js/website_sale.js',
                 'sucursales_carrito/static/src/js/sucursales_checkout.js'
             ),
         ],

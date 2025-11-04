@@ -2,7 +2,6 @@
 <odoo>
     <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
         
-        <!-- Insertar después de la lista de métodos de entrega -->
         <xpath expr="//li[@name='o_delivery_method']" position="after">
             
             <li class="list-group-item d-none" id="sucursal_picker_wrapper">
@@ -19,21 +18,18 @@
                                 <label class="form-label fw-bold" for="sucursal_select">
                                     Sucursal de Recogida <span class="text-danger">*</span>
                                 </label>
-                                <select name="sucursal_recogida" 
-                                        class="form-select form-select-lg" 
-                                        id="sucursal_select" 
-                                        required="required">
+                                <select name="sucursal_recogida" class="form-select form-select-lg" id="sucursal_select" required="required">
                                     <option value="">-- Seleccione una sucursal --</option>
-                                    <option value="escuadron_201">📍 Escuadrón 201 #300, Antiguo Aereopuerto</option>
-                                    <option value="lazaro_cardenas">📍 Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía</option>
-                                    <option value="cosijoeza">📍 Calle Cosijoeza #216-A, Barrio de Jalatlaco</option>
-                                    <option value="eucaliptos">📍 Eucaliptos #215 В, Col. Reforma, 68050</option>
-                                    <option value="riveras">📍 Libramiento Riveras del Atoyac #122-2</option>
-                                    <option value="diaz_ordaz">📍 Díaz Ordaz #710, Col. Centro</option>
-                                    <option value="eduardo_mata">📍 Av. Eduardo Mata #2302, Periférico</option>
-                                    <option value="cristobal_colon">📍 Carretera Cristóbal Colón #202, Santa Rosa</option>
-                                    <option value="yagul">📍 Calle Yagul esq. Cosijopi #122-A</option>
-                                    <option value="vicente_guerrero">📍 Vicente Guerrero, Centro, Oaxaca</option>
+                                    <option value="escuadron_201">Escuadrón 201 #300, Antiguo Aereopuerto</option>
+                                    <option value="lazaro_cardenas">Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía</option>
+                                    <option value="cosijoeza">Calle Cosijoeza #216-A, Barrio de Jalatlaco</option>
+                                    <option value="eucaliptos">Eucaliptos #215 В, Col. Reforma, 68050</option>
+                                    <option value="riveras">Libramiento Riveras del Atoyac #122-2</option>
+                                    <option value="diaz_ordaz">Díaz Ordaz #710, Col. Centro</option>
+                                    <option value="eduardo_mata">Av. Eduardo Mata #2302, Periférico</option>
+                                    <option value="cristobal_colon">Carretera Cristóbal Colón #202, Santa Rosa</option>
+                                    <option value="yagul">Calle Yagul esq. Cosijopi #122-A</option>
+                                    <option value="vicente_guerrero">Vicente Guerrero, Centro, Oaxaca</option>
                                 </select>
                             </div>
                         </div>

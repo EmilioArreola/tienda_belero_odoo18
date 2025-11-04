@@ -19,10 +19,9 @@
                     <option value="vicente_guerrero">Vicente Guerrero, Centro, Oaxaca</option>
                 </select>
             </div>
-
         </xpath>
-    </template>
-   <template id="cambiar_texto_items_resumen" inherit_id="website_sale.cart_summary_header">
+        </xpath>
+
         <xpath expr="//span[@t-esc='website_sale_order.cart_quantity']/following-sibling::text()[contains(., 'item(s)')]" position="replace">
             &#160;producto(s)&#160;-&#160;
         </xpath>

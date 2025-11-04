@@ -4,7 +4,7 @@
     'summary': """
         Agrega un selector de sucursales en el checkout 
         cuando se elige 'Recoger en tienda Vol 2.0'.""",
-    'author': "Carlita",
+    'author': "js",
     'version': '1.0',
     'category': 'Website/eCommerce',
     'depends': [

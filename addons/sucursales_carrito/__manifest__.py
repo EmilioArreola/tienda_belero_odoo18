@@ -3,8 +3,8 @@
     'name': "Sucursales Carrito (Checkout)",
     'summary': """
         Agrega un selector de sucursales en el checkout 
-        cuando se elige 'Recoger en tienda Vol 2.0'.""",
-    'author': "js",
+        cuando se elige 'Recoger en tienda' Vol 2.0.""",
+    'author': "carlita",
     'version': '1.0',
     'category': 'Website/eCommerce',
     'depends': [
@@ -15,15 +15,11 @@
     ],
     
     # --- INICIO DE LA CORRECCIÓN ---
+    # Vamos a usar la forma más simple de registrar el asset.
+    # Quitamos la tupla (after, ...)
     'assets': {
         'web.assets_frontend': [
-            (
-                'after',
-                # ESTA ES LA LÍNEA QUE CAMBIAMOS:
-                # Usamos un archivo de website_sale como ancla, es más seguro.
-                'website_sale/static/src/js/website_sale.js',
-                'sucursales_carrito/static/src/js/sucursales_checkout.js'
-            ),
+            'sucursales_carrito/static/src/js/sucursales_checkout.js',
         ],
     },
     # --- FIN DE LA CORRECCIÓN ---

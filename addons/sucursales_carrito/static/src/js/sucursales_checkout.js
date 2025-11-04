@@ -2,7 +2,7 @@
 
 import publicWidget from "@web/legacy/js/public/public_widget";
 
-console.log("✅ Archivo sucursales_checkout.js ¡CARGADO! (Odoo 18)");
+console.log("✅ Archivo sucursales_checkout.js ¡CARGADO!");
 
 /**
  * Widget para mostrar/ocultar selector de sucursales
@@ -40,7 +40,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         // Buscamos el radio button seleccionado
         const $radioSeleccionado = this.$('input[name="o_delivery_radio"]:checked');
 
-        console.log("🔍 Total de radios encontrados:", this.$('input[name="o_delivery_radio"]').length);
+        console.log("🔍 Total de métodos de envío (radio button) encontrados:", this.$('input[name="o_delivery_radio"]').length);
         console.log("🔍 Radio seleccionado:", $radioSeleccionado.length);
 
         if (!$radioSeleccionado.length) {

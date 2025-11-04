@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
+        
         <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="replace">
             
             <div class="mb-3 d-none" id="sucursal_picker_wrapper">
@@ -23,11 +23,4 @@
 
         </xpath>
     </template>
-
-    <template id="cambiar_texto_items_resumen" inherit_id="website_sale.cart_summary_collapse">
-        <xpath expr="//div[contains(@class, 'd-flex')]/text()[contains(., 'item(s)')]" position="replace">
-            &nbsp;producto(s)&nbsp;-&nbsp;
-        </xpath>
-    </template>
-
 </odoo>

@@ -1,42 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
-        
-        <xpath expr="//li[@name='o_delivery_method']" position="after">
-            
-            <li class="list-group-item d-none" id="sucursal_picker_wrapper">
-                <div class="card border-primary">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary mb-3">
-                            🏪 SELECCIONE SU SUCURSAL
-                        </h5>
-                        <p class="text-muted small mb-3">
-                            Elija la sucursal donde desea recoger su pedido
-                        </p>
-                        <div class="row">
-                            <div class="col-12">
-                                <label class="form-label fw-bold" for="sucursal_select">
-                                    Sucursal de Recogida <span class="text-danger">*</span>
-                                </label>
-                                <select name="sucursal_recogida" class="form-select form-select-lg" id="sucursal_select" required="required">
-                                    <option value="">-- Seleccione una sucursal --</option>
-                                    <option value="escuadron_201">Escuadrón 201 #300, Antiguo Aereopuerto</option>
-                                    <option value="lazaro_cardenas">Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía</option>
-                                    <option value="cosijoeza">Calle Cosijoeza #216-A, Barrio de Jalatlaco</option>
-                                    <option value="eucaliptos">Eucaliptos #215 В, Col. Reforma, 68050</option>
-                                    <option value="riveras">Libramiento Riveras del Atoyac #122-2</option>
-                                    <option value="diaz_ordaz">Díaz Ordaz #710, Col. Centro</option>
-                                    <option value="eduardo_mata">Av. Eduardo Mata #2302, Periférico</option>
-                                    <option value="cristobal_colon">Carretera Cristóbal Colón #202, Santa Rosa</option>
-                                    <option value="yagul">Calle Yagul esq. Cosijopi #122-A</option>
-                                    <option value="vicente_guerrero">Vicente Guerrero, Centro, Oaxaca</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </li>
+        <xpath expr="//a[@name='website_sale_main_button']" position="before">
+            <div class="mb-3 d-none" id="sucursal_picker_wrapper">
+                <h4>SELECCIONE SU SUCURSAL</h4>
+                <select name="sucursal_recogida" class="form-select" id="sucursal_select">
+                    <option value="">Seleccione una sucursal</option>
+                    <option value="1">Escuadrón 201 #300</option>
+                    <option value="2">Av Lázaro Cárdenas 503-3</option>
+                    <option value="3">Calle Cosijoeza #216-A</option>
+                </select>
+            </div>
         </xpath>
-
     </template>
 </odoo>

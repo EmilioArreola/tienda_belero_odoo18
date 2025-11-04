@@ -6,23 +6,28 @@
         cuando se elige 'Recoger en tienda' Vol 2.0.""",
     'author': "carlita",
     'version': '1.0',
-    'category': 'Website/eCommerce',
+   'category': 'Website/eCommerce',
+    
+    # --- INICIO DE LA CORRECCIÓN ---
+    # Agregamos 'website' a las dependencias.
+    # Esto asegura que nuestro módulo cargue después de 'web' y 'website',
+    # lo que debería resolver el problema de 'web.public.widget'.
     'depends': [
-        'website_sale'  # Dependemos del módulo de eCommerce
+        'website_sale',
+        'website', # <-- ¡Esta es la línea clave!
     ],
+    # --- FIN DE LA CORRECCIÓN ---
+    
     'data': [
         'views/templates.xml',  # Carga nuestro archivo de vista
     ],
     
-    # --- INICIO DE LA CORRECCIÓN ---
-    # Vamos a usar la forma más simple de registrar el asset.
-    # Quitamos la tupla (after, ...)
     'assets': {
         'web.assets_frontend': [
+            # Mantenemos la forma simple:
             'sucursales_carrito/static/src/js/sucursales_checkout.js',
         ],
     },
-    # --- FIN DE LA CORRECCIÓN ---
     
     'installable': True,
     'application': False,

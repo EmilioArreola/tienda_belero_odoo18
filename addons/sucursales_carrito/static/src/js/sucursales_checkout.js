@@ -1,84 +1,62 @@
-odoo.define('sucursales_carrito.checkout', function (require) {
-    'use strict';
+/** @odoo-module **/
 
-    var publicWidget = require('web.public.widget');
+import publicWidget from "@web/legacy/js/public/public_widget";
 
-    // --- MENSAJE 1 ---
-    // Este mensaje debe aparecer tan pronto como la página cargue, 
-    // si no aparece, el archivo JS no se está cargando.
-    console.log("✅ Archivo sucursales_checkout.js ¡CARGADO!");
+// --- MENSAJE 1 ---
+console.log("✅ Archivo sucursales_checkout.js ¡CARGADO! (Odoo 18)");
+
+/**
+ * Widget para mostrar/ocultar selector de sucursales
+ * en el checkout cuando se selecciona "Recoger en tienda"
+ */
+publicWidget.registry.SucursalesCheckout = publicWidget.Widget.extend({
+    selector: '#wrap',  // Selector más amplio para asegurar que se cargue
+    events: {
+        'change input[name="delivery_type"]': '_onDeliveryChange',
+    },
 
     /**
-     * Este widget maneja la lógica para mostrar u ocultar el
-     * selector de sucursales en la página de checkout.
+     * @override
      */
-    publicWidget.registry.SucursalesCheckout = publicWidget.Widget.extend({
-        selector: '#shop_checkout', // Se "adhiere" al contenedor principal del checkout
-        events: {
-            // Escucha cambios en CUALQUIER radio button de método de entrega
-            'change input[name="delivery_type"]': '_onDeliveryChange',
-        },
+    start: function () {
+        console.log("🚀 Widget SucursalesCheckout INICIADO");
+        this._onDeliveryChange();
+        return this._super.apply(this, arguments);
+    },
 
-        /**
-         * @override
-         */
-        start: function () {
-            // --- MENSAJE 2 ---
-            // Si ves el Mensaje 1 pero no este, el 'selector' está mal.
-            console.log("🚀 Widget SucursalesCheckout INICIADO y adjunto a #shop_checkout.");
+    /**
+     * Maneja el cambio de método de entrega
+     * @private
+     */
+    _onDeliveryChange: function () {
+        console.log("🖱️ Evento _onDeliveryChange() disparado");
 
-            // Llama a la función _onDeliveryChange() tan pronto como carga la página
-            this._onDeliveryChange();
-            return this._super.apply(this, arguments);
-        },
+        const $selectedRadio = this.$('input[name="delivery_type"]:checked');
 
-        //--------------------------------------------------------------------------
-        // Handlers
-        //--------------------------------------------------------------------------
+        if (!$selectedRadio.length) {
+            console.warn("⚠️ No se encontró ningún radio button seleccionado");
+            return;
+        }
 
-        /**
-         * Se dispara cada vez que el usuario cambia el método de entrega.
-         * @private
-         */
-        _onDeliveryChange: function () {
-            // --- MENSAJE 3 ---
-            // Deberías ver esto CADA VEZ que haces clic en un método de entrega.
-            console.log("🖱️ Evento _onDeliveryChange() disparado.");
+        const selectedValue = $selectedRadio.val();
+        console.log("🔵 Valor seleccionado:", selectedValue);
 
-            // Encuentra el radio button que está SELECCIONADO
-            var $selectedRadio = this.$('input[name="delivery_type"]:checked');
+        const $sucursalWrapper = this.$('#sucursal_picker_wrapper, #sucursal_picker_wrapper_2');
 
-            if (!$selectedRadio.length) {
-                console.warn("No se encontró ningún radio button seleccionado.");
-                return; // No hay nada seleccionado
-            }
+        if (!$sucursalWrapper.length) {
+            console.error("❌ ERROR: No se encontró #sucursal_picker_wrapper");
+            return;
+        }
 
-            // --- [ INICIO DE LA LÓGICA MEJORADA ] ---
-            var selectedValue = $selectedRadio.val();
-
-            // --- MENSAJE 4 ---
-            // Este es el mensaje más importante.
-            console.log("🔵 Valor del radio button seleccionado:", selectedValue);
-
-            var $sucursalWrapper = this.$('#sucursal_picker_wrapper, #sucursal_picker_wrapper_2');
-
-            if (!$sucursalWrapper.length) {
-                console.error("¡ERROR! No se encontró el div #sucursal_picker_wrapper. Revisa el XML.");
-                return;
-            }
-
-            // Comparamos por VALOR ('0') en lugar de TEXTO
-            if (selectedValue === '0') {
-                // --- MENSAJE 5 (ÉXITO) ---
-                console.log("👍 ¡Coincidencia! Mostrando sucursales (valor '0').");
-                $sucursalWrapper.removeClass('d-none');
-            } else {
-                // --- MENSAJE 6 (FALLO) ---
-                console.log("❌ No es '0'. Ocultando sucursales.");
-                $sucursalWrapper.addClass('d-none');
-            }
-        },
-    });
-
-    return publicWidget.registry.SucursalesCheckout;
+        // Mostrar si el valor es '0' (Recoger en tienda)
+        if (selectedValue === '0') {
+            console.log("✅ Mostrando selector de sucursales");
+            $sucursalWrapper.removeClass('d-none');
+        } else {
+            console.log("👎 Ocultando selector de sucursales");
+            $sucursalWrapper.addClass('d-none');
+        }
+    },
 });
+
+export default publicWidget.registry.SucursalesCheckout;

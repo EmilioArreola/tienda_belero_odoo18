@@ -20,7 +20,6 @@
                 </select>
             </div>
         </xpath>
-        </xpath>
 
         <xpath expr="//span[@t-esc='website_sale_order.cart_quantity']/following-sibling::text()[contains(., 'item(s)')]" position="replace">
             &#160;producto(s)&#160;-&#160;

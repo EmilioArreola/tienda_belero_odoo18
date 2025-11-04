@@ -2,40 +2,79 @@
 <odoo>
     <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
         
-        <!-- Insertar después de toda la sección de entrega -->
-        <xpath expr="//div[@id='shipping_and_billing']" position="after">
+        <!-- Insertar después de la lista de métodos de entrega -->
+        <xpath expr="//li[@name='o_delivery_method']" position="after">
             
-            <div class="mb-3 d-none" id="sucursal_picker_wrapper">
-                <div class="card">
+            <li class="list-group-item d-none" id="sucursal_picker_wrapper">
+                <div class="card border-primary">
                     <div class="card-body">
-                        <h4 class="card-title">🏪 ELIJA LA SUCURSAL</h4>
-                        <div class="alert alert-info">
-                            Seleccione la sucursal donde desea recoger su pedido
-                        </div>
+                        <h5 class="card-title text-primary mb-3">
+                            🏪 SELECCIONE SU SUCURSAL
+                        </h5>
+                        <p class="text-muted small mb-3">
+                            Elija la sucursal donde desea recoger su pedido
+                        </p>
                         <div class="row">
                             <div class="col-12">
-                                <label class="form-label" for="sucursal_select">
-                                    <strong>Sucursal de Recogida</strong>
+                                <label class="form-label fw-bold" for="sucursal_select">
+                                    Sucursal de Recogida <span class="text-danger">*</span>
                                 </label>
-                                <select name="sucursal_recogida" class="form-select" id="sucursal_select" required="1">
-                                    <option value="" selected="1">-- Seleccione una sucursal --</option>
-                                    <option value="escuadron_201">Escuadrón 201 #300, Antiguo Aereopuerto</option>
-                                    <option value="lazaro_cardenas">Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía</option>
-                                    <option value="cosijoeza">Calle Cosijoeza, #216-A esq. con Calzada de la República, Barrio de Jalatlaco</option>
-                                    <option value="eucaliptos">Eucaliptos #215 В, Col. Reforma, 68050</option>
-                                    <option value="riveras">Libramiento Riveras del Atoyac #122-2, Esq. Pinos Col. Eucaliptos</option>
-                                    <option value="diaz_ordaz">Díaz Ordaz #710, Col. Centro</option>
-                                    <option value="eduardo_mata">Av. Eduardo Mata #2302, Periférico</option>
-                                    <option value="cristobal_colon">Carretera Cristóbal Colón #202, Santa Rosa</option>
-                                    <option value="yagul">Calle Yagul esq. Cosijopi #122-A</option>
-                                    <option value="vicente_guerrero">Vicente Guerrero, Centro, Oaxaca</option>
+                                <select name="sucursal_recogida" 
+                                        class="form-select form-select-lg" 
+                                        id="sucursal_select" 
+                                        required="required">
+                                    <option value="">-- Seleccione una sucursal --</option>
+                                    <option value="escuadron_201">📍 Escuadrón 201 #300, Antiguo Aereopuerto</option>
+                                    <option value="lazaro_cardenas">📍 Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía</option>
+                                    <option value="cosijoeza">📍 Calle Cosijoeza #216-A, Barrio de Jalatlaco</option>
+                                    <option value="eucaliptos">📍 Eucaliptos #215 В, Col. Reforma, 68050</option>
+                                    <option value="riveras">📍 Libramiento Riveras del Atoyac #122-2</option>
+                                    <option value="diaz_ordaz">📍 Díaz Ordaz #710, Col. Centro</option>
+                                    <option value="eduardo_mata">📍 Av. Eduardo Mata #2302, Periférico</option>
+                                    <option value="cristobal_colon">📍 Carretera Cristóbal Colón #202, Santa Rosa</option>
+                                    <option value="yagul">📍 Calle Yagul esq. Cosijopi #122-A</option>
+                                    <option value="vicente_guerrero">📍 Vicente Guerrero, Centro, Oaxaca</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </li>
         </xpath>
 
     </template>
 </odoo>
+```
+
+## 🎯 Lo que cambió:
+
+### JavaScript:
+- ✅ Usa `input[name="o_delivery_radio"]` (el nombre correcto)
+- ✅ Lee el atributo `data-dm-id` y `data-delivery-type`
+- ✅ Busca el label con `label[for="o_delivery_2"]`
+- ✅ Detecta "Recoger en tienda" por el texto del label
+- ✅ Scroll automático hacia las sucursales cuando aparecen
+- ✅ Limpia la selección cuando oculta las sucursales
+
+### XML:
+- ✅ Usa `xpath` correcto: `//li[@name='o_delivery_method']`
+- ✅ Inserta el selector como un `<li>` para que esté en la misma lista
+- ✅ Diseño mejorado con card de Bootstrap
+
+## 📋 Pasos finales:
+
+1. **Reemplaza** el contenido de `views/templates.xml` con el XML de arriba
+2. **El JS ya está actualizado** en el artifact
+3. **Reinicia Odoo**
+4. **Actualiza el módulo**
+5. **Limpia caché** del navegador (Ctrl+Shift+R)
+6. **Ve al checkout** y haz clic en "Recoger en tienda"
+
+Deberías ver en la consola:
+```
+🔍 Total de radios encontrados: 4
+🔍 Radio seleccionado: 1
+🔵 ID del método: 2
+🔵 Tipo de entrega: fixed
+📝 Texto del label: recoger en tienda
+✅ ¡ES RECOGER EN TIENDA! Mostrando selector de sucursales

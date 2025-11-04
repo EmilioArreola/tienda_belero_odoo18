@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
-        <xpath expr="//a[@name='website_sale_main_button']" position="before">
+        
+        <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="after">
+            
             <div class="mb-3 d-none" id="sucursal_picker_wrapper">
                 <h4>SELECCIONE SU SUCURSAL</h4>
                 <select name="sucursal_recogida" class="form-select" id="sucursal_select">
@@ -9,8 +11,9 @@
                     <option value="1">Escuadrón 201 #300</option>
                     <option value="2">Av Lázaro Cárdenas 503-3</option>
                     <option value="3">Calle Cosijoeza #216-A</option>
-                </select>
+                    </select>
             </div>
+
         </xpath>
     </template>
 </odoo>

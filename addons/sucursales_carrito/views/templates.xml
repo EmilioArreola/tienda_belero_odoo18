@@ -2,8 +2,8 @@
 <odoo>
     <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
         
-        <!-- Insertar después del formulario de entrega -->
-        <xpath expr="//div[@id='delivery_carrier']" position="after">
+        <!-- Opción 1: Insertar después de la sección de métodos de entrega -->
+        <xpath expr="//div[contains(@class, 'o_delivery_method')]" position="after">
             
             <div class="mb-3 d-none" id="sucursal_picker_wrapper">
                 <h4 class="o_page_header mt-4">🏪 ELIJA LA SUCURSAL</h4>

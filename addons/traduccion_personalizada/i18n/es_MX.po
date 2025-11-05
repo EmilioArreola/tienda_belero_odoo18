@@ -1,0 +1,12 @@
+# Traducción personalizada de Español para 'item(s)'
+#. module: website_sale
+msgid "item(s)"
+msgstr "producto(s)"
+
+#. module: website_sale
+msgid "item"
+msgstr "producto"
+
+#. module: website_sale
+msgid "items"
+msgstr "productos"

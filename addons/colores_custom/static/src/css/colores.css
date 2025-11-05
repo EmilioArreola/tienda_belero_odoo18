@@ -1,7 +1,7 @@
 /* ======== 1. PALETA DE COLORES CENTRALIZADA ======== */
 /* Define tus colores aquí una sola vez */
 :root {
-    --mi-color-primario: #4682b4; /* Azul Acero */
+    --mi-color-primario: #3c74b4; /* Azul Acero */
     --mi-color-primario-hover: #0e4579; /* Azul Oscuro (para hovers) */
     --mi-color-primario-borde: #135aaa; /* Borde para botones */
     --mi-color-texto-claro: #ffffff;

@@ -53,3 +53,15 @@ header.modal-header {
     padding-top: 8px !important;
     padding-bottom: 8px !important;
 }
+
+/* Oculta la fila de impuestos si el monto es cero */
+/* (Esto puede variar según tu versión de Odoo, pero prueba) */
+tr.o_tax_group.o_tax_group_light,
+tr.o_tax_group[data-tax-group-amount="0"] {
+    display: none !important;
+}
+
+/* Si eso falla, esta es la forma más agresiva */
+.o_tax_total_label {
+    display: none !important;
+}

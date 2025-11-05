@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="inherit_checkout_address_hide_billing" inherit_id="website_sale.address_billing">
+        
+        <xpath expr="." position="replace">
+            </xpath>
+        
+    </template>
+</odoo>

@@ -35,6 +35,7 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_sales_order_filter"/>
         <field name="arch" type="xml">
+            <!-- Agregar filtro después de "Mis órdenes" -->
             <xpath expr="//filter[@name='my_sale_orders_filter']" position="after">
                 <separator/>
                 <filter string="Con Sucursal de Recogida" 
@@ -42,7 +43,8 @@
                         domain="[('sucursal_recogida', '!=', False)]"/>
             </xpath>
             
-            <xpath expr="//group[@name='group_by']" position="inside">
+            <!-- Agregar agrupación - Busca cualquier elemento <group> dentro de <search> -->
+            <xpath expr="//search/group" position="inside">
                 <filter string="Sucursal de Recogida" 
                         name="group_by_sucursal" 
                         context="{'group_by': 'sucursal_recogida'}"/>

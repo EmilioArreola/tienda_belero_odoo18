@@ -36,9 +36,17 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
                 console.log(`📥 Sucursal restaurada: ${data.sucursal}`);
             }
 
+            // ... dentro de _cargarEstadoInicial o start ...
             setTimeout(() => {
+                // Deseleccionar todos los radio buttons de entrega si ninguno está 'seleccionado'
+                const $selectedRadio = this.$('input[name="o_delivery_radio"]:checked');
+                if (!$selectedRadio.length) {
+                    // Podrías intentar desmarcar todos para asegurar
+                    this.$('input[name="o_delivery_radio"]').prop('checked', false);
+                }
                 this._alCambiarMetodoEntrega();
             }, 300);
+            // ...
 
         } catch (error) {
             console.error("❌ Error al cargar estado inicial:", error);
@@ -94,6 +102,8 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
     _alCambiarSucursal: async function () {
         const $selector = this.$('#sucursal_select');
+        $selector.removeClass('is-valid is-invalid'); // Añadir esta línea
+
         const valorSucursal = $selector.val();
 
         console.log(`🏦 Sucursal seleccionada: ${valorSucursal}`);
@@ -124,36 +134,48 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
      * Valida que se haya seleccionado una sucursal antes de enviar el formulario
      */
     _onSubmitCheckout: function (ev) {
+        const $radioSeleccionado = this.$('input[name="o_delivery_radio"]:checked');
         const $contenedorSucursales = this.$('#sucursal_picker_wrapper');
 
-        // Solo validar si el selector está visible
-        if (!$contenedorSucursales.hasClass('d-none')) {
-            const $selector = this.$('#sucursal_select');
-            const valorSucursal = $selector.val();
+        if ($radioSeleccionado.length) {
+            const idRadio = $radioSeleccionado.attr('id');
+            const $label = this.$('label[for="' + idRadio + '"]');
+            const textoLabel = $label.text().trim().toLowerCase();
+            const tipoEntrega = $radioSeleccionado.attr('data-delivery-type');
+            const precio = parseFloat($radioSeleccionado.attr('data-amount') || 0);
 
-            if (!valorSucursal || valorSucursal === '') {
-                ev.preventDefault();
-                ev.stopPropagation();
+            const esRecogerEnTienda = this._esMetodoRecogida(textoLabel, tipoEntrega, precio);
 
-                // Marcar el campo como inválido
-                $selector.addClass('is-invalid');
+            // Validar si es método de recogida O si el contenedor está visible
+            if (esRecogerEnTienda || !$contenedorSucursales.hasClass('d-none')) {
+                const $selector = this.$('#sucursal_select');
+                const valorSucursal = $selector.val();
 
-                // Hacer scroll al campo
-                $contenedorSucursales[0].scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
+                if (!valorSucursal || valorSucursal === '') {
+                    ev.preventDefault();
+                    ev.stopPropagation();
 
-                // Mostrar alerta
-                alert('Por favor, seleccione una sucursal para recoger su pedido.');
+                    // Marcar el campo como inválido
+                    $selector.addClass('is-invalid');
+                    $contenedorSucursales.find('#sucursal_error_msg').removeClass('d-none'); // Mostrar mensaje de error
 
-                console.warn("⚠️ Formulario bloqueado: No se ha seleccionado sucursal");
-                return false;
+                    // Hacer scroll y mostrar alerta (como ya lo tienes)
+                    $contenedorSucursales[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    alert('Por favor, seleccione una sucursal para recoger su pedido.');
+
+                    console.warn("⚠️ Formulario bloqueado: No se ha seleccionado sucursal");
+                    return false;
+                } else {
+                    // Si la validación es exitosa, asegúrate de quitar el mensaje de error
+                    $selector.removeClass('is-invalid');
+                    $contenedorSucursales.find('#sucursal_error_msg').addClass('d-none');
+                }
             }
         }
 
-        return true;
+        return true; // Continuar con el submit
     },
+
 
     _mostrarSucursales: function () {
         const $contenedorSucursales = this.$('#sucursal_picker_wrapper');

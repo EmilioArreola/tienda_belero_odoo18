@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import base64
 import logging
+import unicodedata
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
@@ -54,26 +55,53 @@ class RecetasWebsite(http.Controller):
 
     RECETAS_PER_PAGE = 12
 
-    # --- LISTA DE RECETAS ---
+        # --- LISTA DE RECETAS ---
     @http.route(['/recetas', '/recetas/page/<int:page>'], type='http', auth="public", website=True)
     def mostrar_recetas(self, page=1, **kw):
+        import unicodedata  # <-- Necesario para eliminar acentos
+
         search_term = kw.get('search', '').strip()
         todas_las_recetas = request.env['receta.receta'].search([])
 
+        def normalizar(texto):
+            """Convierte el texto a minúsculas y sin acentos."""
+            if not texto:
+                return ''
+            texto = texto.lower()
+            texto = ''.join(
+                c for c in unicodedata.normalize('NFKD', texto)
+                if not unicodedata.combining(c)
+            )
+            return texto
+
         if search_term:
-            search_terms = [t.lower() for t in search_term.split()]
+            search_terms = [normalizar(t) for t in search_term.split()]
+            filtro = kw.get('filter', 'todo').lower()  # puede ser: 'todo', 'ingredientes', 'categorias', 'nombre'
+            
             recetas_filtradas = []
             for receta in todas_las_recetas:
-                nombre = receta.name.lower()
-                categorias = [c.name.lower() for c in receta.categoria_ids]
-                ingredientes = [i.name.lower() for i in receta.ingrediente_ids]
+                nombre = normalizar(receta.name)
+                categorias = [normalizar(c.name) for c in receta.categoria_ids]
+                ingredientes = [normalizar(i.name) for i in receta.ingrediente_ids]
+
+                # Elegir dónde buscar según el filtro
+                if filtro == 'ingredientes':
+                    campos_a_buscar = ingredientes
+                elif filtro == 'categorias':
+                    campos_a_buscar = categorias
+                elif filtro == 'nombre':
+                    campos_a_buscar = [nombre]
+                else:
+                    campos_a_buscar = ingredientes + categorias + [nombre]
+
                 match = all(
-                    any(term in nombre or any(term in c for c in categorias) or any(term in i for i in ingredientes) 
-                        for term in [t])
-                    for t in search_terms
+                    any(term in campo for campo in campos_a_buscar)
+                    for term in search_terms
                 )
+
                 if match:
                     recetas_filtradas.append(receta)
+
             recetas_finales = recetas_filtradas
         else:
             recetas_finales = todas_las_recetas
@@ -84,7 +112,7 @@ class RecetasWebsite(http.Controller):
             total=total_recetas,
             page=page,
             step=self.RECETAS_PER_PAGE,
-            url_args={'search': search_term} if search_term else {}
+            url_args={'search': search_term, 'filter': kw.get('filter', 'todo')} if search_term else {}
         )
         offset = pager['offset']
         recetas_de_la_pagina = recetas_finales[offset: offset + self.RECETAS_PER_PAGE]
@@ -92,8 +120,10 @@ class RecetasWebsite(http.Controller):
         return request.render('modulo_recetas.pagina_recetas_lista', {
             'recetas': recetas_de_la_pagina,
             'search': search_term,
+            'filter': kw.get('filter', 'todo'),  # <-- para recordar el filtro actual en el template
             'pager': pager,
         })
+
 
     # --- DETALLE DE RECETA ---
     @http.route('/recetas/<model("receta.receta"):receta>', type='http', auth="public", website=True)
@@ -203,7 +233,8 @@ class RecetasWebsite(http.Controller):
                 # Detectar palabras de cantidad/medida solas (Cubos, Rebanadas, Pizca, etc.)
                 palabras_cantidad = ['cubos', 'rebanadas', 'pizca', 'pizcas', 'taza', 'tazas', 
                                     'cucharada', 'cucharadas', 'cucharadita', 'cucharaditas',
-                                    'gramos', 'gram', 'ml', 'litros', 'kg', 'aceite']
+                                    'gramos', 'gram', 'ml', 'litros', 'kg', 'aceite', '1/2', '1/3',
+                                    '1/4', 'sal', 'pimienta']
                 es_palabra_cantidad = linea_actual.lower() in palabras_cantidad
                 
                 if (es_cantidad or es_palabra_cantidad) and i + 1 < len(lineas):

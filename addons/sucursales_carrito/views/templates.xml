@@ -6,7 +6,9 @@
             
             <div class="mb-3 d-none" id="sucursal_picker_wrapper">
                 <h4 class="fs-6 small text-uppercase fw-bolder">SELECCIONE LA SUCURSAL DONDE RECOGERÁ SU PEDIDO</h4>
-                <select name="sucursal_recogida" class="form-select" id="sucursal_select">
+                
+                <select name="sucursal_recogida_frontend" class="form-select" id="sucursal_select">
+                    <option value="" selected="1" disabled="1">Por favor, seleccione una sucursal...</option>
                     <option value="escuadron_201">Escuadrón 201 #300, Antiguo Aereopuerto</option>
                     <option value="lazaro_cardenas">Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía</option>
                     <option value="cosijoeza">Calle Cosijoeza #216-A, Barrio de Jalatlaco</option>
@@ -18,6 +20,7 @@
                     <option value="yagul">Calle Yagul esq. Cosijopi #122-A</option>
                     <option value="vicente_guerrero">Vicente Guerrero, Centro, Oaxaca</option>
                 </select>
+                <div class="invalid-feedback">Por favor, seleccione una sucursal.</div>
             </div>
         </xpath>
     </template>

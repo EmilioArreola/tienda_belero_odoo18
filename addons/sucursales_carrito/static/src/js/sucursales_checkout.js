@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
 import publicWidget from "@web/legacy/js/public/public_widget";
+// No necesitamos importar jsonrpc si usamos this.rpc bindeado
 
-console.log("✅ Archivo sucursales_checkout.js ¡CARGADO!");
+console.log("✅ Archivo sucursales_checkout.js ¡CARGADO! (v1.1)");
 
 /**
  * Widget para mostrar/ocultar selector de sucursales
@@ -14,6 +15,8 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         // Evento específico para los radio buttons de Odoo
         'change input[name="o_delivery_radio"]': '_alCambiarMetodoEntrega',
         'click label.o_delivery_carrier_label': '_alCambiarMetodoEntrega',
+        // NUEVO EVENTO: al cambiar la sucursal seleccionada
+        'change #sucursal_select': '_alCambiarSucursal',
     },
 
     /**
@@ -21,6 +24,9 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
      */
     start: function () {
         console.log("🚀 Widget SelectorSucursales INICIADO");
+
+        // Bindeamos el servicio RPC para poder llamar al controlador
+        this.rpc = this.bindService("rpc");
 
         // Esperamos un poco para que el DOM esté completamente cargado
         setTimeout(() => {
@@ -63,17 +69,44 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         console.log("📝 Texto del label:", textoLabel);
 
         // Verificamos si es "Recoger en tienda"
+        // (Mejoramos un poco la lógica original)
         const esRecogerEnTienda = textoLabel.includes('recoger') ||
             textoLabel.includes('tienda') ||
-            tipoEntrega === 'fixed' && textoLabel.includes('gratis');
+            (tipoEntrega === 'fixed' && (textoLabel.includes('gratis') || textoLabel.includes('recoger')));
 
         if (esRecogerEnTienda) {
             console.log("✅ ¡ES RECOGER EN TIENDA! Mostrando selector de sucursales");
             this._mostrarSucursales();
+            // Forzamos el envío de la sucursal actual (o la por defecto)
+            this._alCambiarSucursal();
         } else {
             console.log("👎 NO es recoger en tienda. Ocultando selector de sucursales");
             this._ocultarSucursales();
         }
+    },
+    
+    /**
+     * NUEVA FUNCIÓN: Maneja el cambio en el selector de sucursal
+     * y lo envía al backend
+     * @private
+     */
+    _alCambiarSucursal: function () {
+        const $selector = this.$('#sucursal_select');
+        const valorSucursal = $selector.val();
+        console.log(`🏦 Sucursal seleccionada: ${valorSucursal}`);
+
+        // Usamos this.rpc (bindeado en start) para llamar a nuestra ruta JSON
+        this.rpc('/shop/update_sucursal', {
+            sucursal: valorSucursal
+        }).then(function (data) {
+            if (data.status === 'success') {
+                console.log(`✅ Sucursal guardada en cotización: ${data.sucursal_guardada}`);
+            } else {
+                console.error(`❌ Error al guardar sucursal: ${data.error}`);
+            }
+        }).catch(function (error) {
+            console.error("❌ ERROR RPC:", error);
+        });
     },
 
     /**
@@ -89,6 +122,9 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         }
 
         $contenedorSucursales.removeClass('d-none').show();
+        
+        // Hacemos que el select sea requerido para la validación del form
+        this.$('#sucursal_select').prop('required', true);
 
         // Hacer scroll suave hacia las sucursales
         setTimeout(() => {
@@ -107,8 +143,11 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         const $contenedorSucursales = this.$('#sucursal_picker_wrapper');
         $contenedorSucursales.addClass('d-none').hide();
 
-        // Limpiar la selección
-        this.$('#sucursal_select').val('');
+        // Limpiar la selección y quitar 'required'
+        this.$('#sucursal_select').val('').prop('required', false);
+        
+        // Enviar valor vacío al backend para limpiar la selección
+        this._alCambiarSucursal(); 
     },
 });
 

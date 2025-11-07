@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -18,60 +18,39 @@ class SaleOrder(models.Model):
         ('vicente_guerrero', 'Vicente Guerrero, Centro, Oaxaca'),
     ], string='Sucursal de Recogida', 
        copy=False,
-       tracking=True,  # Para seguimiento en el chatter
+       tracking=True,
        help="Sucursal donde el cliente recogerá su pedido")
 
-    @api.constrains('sucursal_recogida', 'carrier_id')
-    def _check_sucursal_recogida(self):
-        """Valida que se haya seleccionado una sucursal si el método de entrega lo requiere"""
-        for order in self:
-            # Verifica si es un método de "recoger en tienda"
-            # Ajusta esta lógica según tu configuración específica
-            if order.carrier_id and self._es_metodo_recogida(order.carrier_id):
-                if not order.sucursal_recogida:
-                    raise ValidationError(_(
-                        'Debe seleccionar una sucursal de recogida para este método de entrega.'
-                    ))
-
-    def _es_metodo_recogida(self, carrier):
+    def _es_metodo_recogida(self):
         """
-        Determina si un carrier es de tipo "recoger en tienda"
-        Personaliza esta lógica según tus necesidades
+        Determina si el carrier actual es de tipo "recoger en tienda"
         """
+        self.ensure_one()
+        if not self.carrier_id:
+            return False
+        
+        carrier = self.carrier_id
+        
         # Opción 1: Por nombre del carrier
         if carrier.name and any(palabra in carrier.name.lower() 
-                               for palabra in ['recoger', 'tienda', 'sucursal', 'pickup']):
+                               for palabra in ['recoger', 'tienda', 'sucursal', 'pickup', 'retirar']):
             return True
         
-        # Opción 2: Por tipo de entrega (si usas fixed para recogida)
+        # Opción 2: Por tipo de entrega fixed con precio 0
         if carrier.delivery_type == 'fixed' and carrier.fixed_price == 0:
             return True
-        
-        # Opción 3: Agregar un campo personalizado al carrier (recomendado)
-        # if hasattr(carrier, 'es_recogida_tienda') and carrier.es_recogida_tienda:
-        #     return True
         
         return False
 
     def action_confirm(self):
-        """Valida que haya sucursal seleccionada antes de confirmar"""
+        """
+        Valida que haya sucursal seleccionada SOLO al momento de confirmar
+        """
         for order in self:
-            if order.carrier_id and self._es_metodo_recogida(order.carrier_id):
-                if not order.sucursal_recogida:
-                    raise ValidationError(_(
-                        'Debe seleccionar una sucursal de recogida antes de confirmar el pedido.'
-                    ))
+            if order._es_metodo_recogida() and not order.sucursal_recogida:
+                raise UserError(_(
+                    'Debe seleccionar una sucursal de recogida antes de confirmar el pedido.\n\n'
+                    'Por favor, regrese al paso anterior y seleccione la sucursal donde '
+                    'desea recoger su pedido.'
+                ))
         return super(SaleOrder, self).action_confirm()
-
-    def _cart_update_order_line(self, product_id, quantity, order_line, **kwargs):
-        """
-        Override para mantener la sucursal al actualizar líneas del carrito
-        """
-        values = super()._cart_update_order_line(product_id, quantity, order_line, **kwargs)
-        
-        # Limpia la sucursal si se cambia a un método que no es de recogida
-        if self.carrier_id and not self._es_metodo_recogida(self.carrier_id):
-            if self.sucursal_recogida:
-                self.sucursal_recogida = False
-        
-        return values

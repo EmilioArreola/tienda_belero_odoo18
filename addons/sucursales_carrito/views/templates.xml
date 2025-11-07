@@ -4,23 +4,39 @@
         
         <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="before">
             
-            <div class="mb-3 d-none" id="sucursal_picker_wrapper">
-                <h4 class="fs-6 small text-uppercase fw-bolder">SELECCIONE LA SUCURSAL DONDE RECOGERÁ SU PEDIDO</h4>
+            <div class="mb-4 d-none" id="sucursal_picker_wrapper">
+                <h4 class="fs-6 small text-uppercase fw-bolder text-primary">
+                    <i class="fa fa-map-marker me-2"></i>
+                    SELECCIONE LA SUCURSAL DONDE RECOGERÁ SU PEDIDO
+                </h4>
                 
-                <select name="sucursal_recogida_frontend" class="form-select" id="sucursal_select">
-                    <option value="" selected="1" disabled="1">Por favor, seleccione una sucursal...</option>
-                    <option value="escuadron_201">Escuadrón 201 #300, Antiguo Aereopuerto</option>
-                    <option value="lazaro_cardenas">Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía</option>
-                    <option value="cosijoeza">Calle Cosijoeza #216-A, Barrio de Jalatlaco</option>
-                    <option value="eucaliptos">Eucaliptos #215 В, Col. Reforma, 68050</option>
-                    <option value="riveras">Libramiento Riveras del Atoyac #122-2</option>
-                    <option value="diaz_ordaz">Díaz Ordaz #710, Col. Centro</option>
-                    <option value="eduardo_mata">Av. Eduardo Mata #2302, Periférico</option>
-                    <option value="cristobal_colon">Carretera Cristóbal Colón #202, Santa Rosa</option>
-                    <option value="yagul">Calle Yagul esq. Cosijopi #122-A</option>
-                    <option value="vicente_guerrero">Vicente Guerrero, Centro, Oaxaca</option>
+                <div class="alert alert-info small mb-3" role="alert">
+                    <i class="fa fa-info-circle me-1"></i>
+                    Por favor, seleccione la sucursal de su preferencia para recoger su pedido.
+                </div>
+                
+                <select name="sucursal_recogida_frontend" 
+                        class="form-select form-select-lg" 
+                        id="sucursal_select"
+                        required="required">
+                    <option value="" selected="selected" disabled="disabled">
+                        -- Seleccione una sucursal --
+                    </option>
+                    <option value="escuadron_201">📍 Escuadrón 201 #300, Antiguo Aereopuerto</option>
+                    <option value="lazaro_cardenas">📍 Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía</option>
+                    <option value="cosijoeza">📍 Calle Cosijoeza #216-A, Barrio de Jalatlaco</option>
+                    <option value="eucaliptos">📍 Eucaliptos #215 В, Col. Reforma, 68050</option>
+                    <option value="riveras">📍 Libramiento Riveras del Atoyac #122-2</option>
+                    <option value="diaz_ordaz">📍 Díaz Ordaz #710, Col. Centro</option>
+                    <option value="eduardo_mata">📍 Av. Eduardo Mata #2302, Periférico</option>
+                    <option value="cristobal_colon">📍 Carretera Cristóbal Colón #202, Santa Rosa</option>
+                    <option value="yagul">📍 Calle Yagul esq. Cosijopi #122-A</option>
+                    <option value="vicente_guerrero">📍 Vicente Guerrero, Centro, Oaxaca</option>
                 </select>
-                <div class="invalid-feedback">Por favor, seleccione una sucursal.</div>
+                
+                <div class="invalid-feedback">
+                    Por favor, seleccione una sucursal para continuar.
+                </div>
             </div>
         </xpath>
     </template>

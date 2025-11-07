@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Evitar preselección automática del primer método de entrega -->
+    <template id="quitar_autoseleccion_delivery" inherit_id="website_sale_delivery.delivery_carrier_select">
+        <xpath expr="//input[@name='o_delivery_radio']" position="attributes">
+            <attribute name="checked"></attribute>
+        </xpath>
+    </template>
+
+    <!-- Selector de sucursales -->
     <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
         
         <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="before">
@@ -33,7 +41,8 @@
                     <option value="vicente_guerrero">📍 Vicente Guerrero, Centro, Oaxaca</option>
                 </select>
                 
-                <small class="text-danger d-none mt-2" id="sucursal_error_msg">
+                <small class="text-danger d-none mt-2 d-block" id="sucursal_error_msg">
+                    <i class="fa fa-exclamation-triangle me-1"></i>
                     Por favor, seleccione una sucursal para continuar.
                 </small>
             </div>

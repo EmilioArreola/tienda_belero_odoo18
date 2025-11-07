@@ -2,7 +2,7 @@
 {
     'name': "Sucursales Carrito (Checkout)",
     'summary': "Selector de sucursales en checkout para Odoo 18",
-    'author': "v1.7",  # Actualizado
+    'author': "v1.7.1",  # Actualizado
     'version': '18.0.1.1', # Actualizado
 
     'category': 'Website/eCommerce',
@@ -19,9 +19,8 @@
     
     'assets': {
         'web.assets_frontend': [
-        'sucursales_carrito/static/src/js/sucursales_checkout.js',
-        'sucursales_carrito/static/src/css/sucursales_style.css',
-    ],
+        'sucursales_carrito/static/src/js/sucursales_checkout.js'
+        ],
     },
     
     'installable': True,

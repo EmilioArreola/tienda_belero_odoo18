@@ -2,7 +2,7 @@
 {
     'name': "Sucursales Carrito (Checkout)",
     'summary': "Selector de sucursales en checkout para Odoo 18",
-    'author': "v1.6.3.4",  # Actualizado
+    'author': "v1.6.3.0",  # Actualizado
     'version': '18.0.1.1', # Actualizado
 
     'category': 'Website/eCommerce',

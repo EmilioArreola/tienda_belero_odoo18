@@ -53,6 +53,9 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
                 if (radioId) {
                     const $radio = this.$('#' + radioId);
                     if ($radio.length) {
+                        // Desmarcar todos primero
+                        this.$('input[name="o_delivery_radio"]').prop('checked', false);
+                        // Marcar el correcto
                         $radio.prop('checked', true);
                         console.log(`✅ Preselección aplicada: ${textoEnvio}`);
                         found = true;
@@ -67,12 +70,9 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         }
     },
 
-    /**
-     * FUNCIÓN ELIMINADA: _quitarPreseleccion
-     */
-
     _cargarEstadoInicial: async function () {
         try {
+            // Esta ruta la agregué en controllers/main.py
             const data = await this.rpc('/shop/get_sucursal', {});
 
             if (data.status === 'success' && data.sucursal) {
@@ -85,92 +85,58 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     },
 
     /**
-     * REQ 2: Interceptar el botón Confirmar (Tu código v2.0 ya hace esto)
-     * Esta función ya hace lo que pides: muestra el error en rojo y un alert.
+     * REQ 2: Interceptar el botón Confirmar
      */
     _interceptarBotonConfirmar: function () {
         const self = this;
+        const botonSelector = 'a[href="/shop/confirm_order"]';
 
-        // Interceptar TODOS los posibles botones de confirmar
-        const selectores = [
-            'a.website_sale_main_button[href="/shop/confirm_order"]',
-            'a[href="/shop/confirm_order"]',
-            'button.website_sale_main_button',
-            'a:contains("Confirmar")',
-        ];
+        // Usar event delegation en un elemento estático superior
+        // Esto es más robusto que $(selector).on('click'...)
+        this.$el.on('click', botonSelector, function (ev) {
+            console.log("🔴 BOTÓN CONFIRMAR CLICKEADO");
 
-        selectores.forEach(selector => {
-            this.$(selector).on('click', function (ev) {
-                console.log("🔴 BOTÓN CONFIRMAR CLICKEADO");
+            const $wrapper = self.$('#sucursal_picker_wrapper');
 
-                const $wrapper = self.$('#sucursal_picker_wrapper');
+            // Solo validar si las sucursales están visibles
+            if ($wrapper.length > 0 && !$wrapper.hasClass('d-none')) {
+                const $select = self.$('#sucursal_select');
+                const valor = $select.val();
 
-                // Solo validar si las sucursales están visibles
-                if (!$wrapper.hasClass('d-none')) {
-                    const $select = self.$('#sucursal_select');
-                    const valor = $select.val();
+                console.log(`🔍 Validando sucursal: "${valor}"`);
 
-                    console.log(`🔍 Validando sucursal: "${valor}"`);
+                if (!valor || valor === '' || valor === null) {
+                    // BLOQUEAR navegación
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    ev.stopImmediatePropagation();
 
-                    if (!valor || valor === '' || valor === null) {
-                        // BLOQUEAR navegación
-                        ev.preventDefault();
-                        ev.stopPropagation();
-                        ev.stopImmediatePropagation();
+                    console.warn("⛔ BLOQUEADO - No hay sucursal");
 
-                        console.warn("⛔ BLOQUEADO - No hay sucursal");
+                    // Marcar error
+                    $select.addClass('is-invalid').removeClass('is-valid');
+                    self.$('#sucursal_error_msg').addClass('show');
 
-                        // Marcar error
-                        $select.addClass('is-invalid').removeClass('is-valid');
-                        self.$('#sucursal_error_msg').addClass('show');
+                    // Scroll
+                    $wrapper[0].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
 
-                        // Scroll
-                        $wrapper[0].scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
+                    // Alert
+                    setTimeout(() => {
+                        alert('⚠️ Por favor, seleccione una sucursal antes de continuar.');
+                    }, 100);
 
-                        // Alert
-                        setTimeout(() => {
-                            alert('⚠️ Por favor, seleccione una sucursal antes de continuar.');
-                        }, 100);
-
-                        return false;
-                    } else {
-                        console.log("✅ Validación OK - Continuando");
-                    }
-                }
-            });
-        });
-
-        // También interceptar por clase directamente
-        // (Este es un segundo seguro, por si el 'on' de Odoo falla)
-        document.addEventListener('click', function (e) {
-            const target = e.target.closest('a[href="/shop/confirm_order"]');
-            if (target) {
-                console.log("🔴 Click detectado vía addEventListener");
-
-                const $wrapper = self.$('#sucursal_picker_wrapper');
-                if ($wrapper.length > 0 && !$wrapper.hasClass('d-none')) {
-                    const $select = self.$('#sucursal_select');
-                    const valor = $select.val();
-
-                    if (!valor || valor === '') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        e.stopImmediatePropagation();
-
-                        $select.addClass('is-invalid');
-                        self.$('#sucursal_error_msg').addClass('show');
-
-                        alert('⚠️ Por favor, seleccione una sucursal.');
-                        return false;
-                    }
+                    return false;
+                } else {
+                    console.log("✅ Validación OK - Continuando");
+                    S
                 }
             }
-        }, true); // Usar capture phase
+        });
 
-        console.log("✅ Interceptores instalados");
+        console.log("✅ Interceptor de clic instalado");
     },
 
     _onClickDeliveryLabel: function (ev) {
@@ -207,23 +173,18 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     _esMetodoRecogida: function (texto, tipo, precio) {
         const palabras = ['recoger', 'tienda', 'sucursal', 'pickup', 'retirar'];
         const tienePalabra = palabras.some(p => texto.includes(p));
-        // Tu "Recoger en tienda" es "Gratis", por eso funciona esta lógica
-        const esGratis = (tipo === 'fixed' && precio === 0);
+        const esGratis = (tipo === 'fixed' && precio === 0); // "Recoger en tienda" es gratis
 
         return tienePalabra || esGratis;
     },
 
-    /**
-     * SOLUCIÓN 2: No mostrar error en rojo al seleccionar
-     * (Tu código v2.0 ya hace esto bien)
-     */
     _alCambiarSucursal: async function () {
         const $select = this.$('#sucursal_select');
         const valor = $select.val();
 
         console.log(`🏦 Sucursal cambiada a: "${valor}"`);
 
-        // IMPORTANTE: Limpiar errores inmediatamente
+        // Limpiar errores inmediatamente
         $select.removeClass('is-invalid is-valid');
         this.$('#sucursal_error_msg').removeClass('show');
 
@@ -250,11 +211,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
     _mostrarSucursales: function () {
         const $wrapper = this.$('#sucursal_picker_wrapper');
-
-        if (!$wrapper.length) {
-            console.error("❌ No existe #sucursal_picker_wrapper");
-            return;
-        }
+        if (!$wrapper.length) { return; }
 
         $wrapper.removeClass('d-none').addClass('d-block');
 
@@ -263,6 +220,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
         if (valorActual && valorActual !== '') {
             this._alCambiarSucursal();
+            s
         }
 
         setTimeout(() => {

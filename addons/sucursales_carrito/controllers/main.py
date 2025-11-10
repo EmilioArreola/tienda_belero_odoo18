@@ -23,3 +23,16 @@ class SucursalCheckout(http.Controller):
         except Exception as e:
             # Esto podría fallar si el valor de 'sucursal' no es válido
             return {'error': str(e)}
+
+    # --- ¡ESTA ES LA FUNCIÓN QUE TE FALTA! ---
+    @http.route(['/shop/get_sucursal'], type='json', auth="public", website=True)
+    def get_sucursal_recogida(self, **kwargs):
+        """
+        Devuelve la sucursal guardada en la orden actual para que
+        el JS pueda restaurarla al cargar la página.
+        """
+        order = request.website.sale_get_order()
+        if order and order.sucursal_recogida:
+            return {'status': 'success', 'sucursal': order.sucursal_recogida}
+        # Si no hay orden o no hay sucursal, no devuelve nada
+        return {'status': 'error', 'sucursal': False}   

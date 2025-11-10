@@ -7,14 +7,6 @@
         <!-- CSS personalizado -->
         <xpath expr="//head" position="inside">
             <style>
-                /* Forzar que ningún radio esté checked al cargar */
-                input[name="o_delivery_radio"] {
-                pointer-events: auto !important;
-                }
-                input[name="o_delivery_radio"]:checked {
-                background-color: #0d6efd;
-                border-color: #0d6efd;
-                }
                 /* Estilos para el selector de sucursales */
                 #sucursal_select {
                     border: 2px solid #dee2e6;

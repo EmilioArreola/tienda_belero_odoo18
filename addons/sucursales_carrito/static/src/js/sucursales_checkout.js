@@ -2,29 +2,36 @@
 
 import publicWidget from "@web/legacy/js/public/public_widget";
 
-console.log("✅ Archivo sucursales_checkout.js ¡CARGADO! (v1.4 - con validación)");
+console.log("✅ sucursales_checkout.js v2.0 - DEFINITIVO");
 
-/**
- * Widget para mostrar/ocultar selector de sucursales
- * en el checkout cuando se selecciona "Recoger en tienda"
- */
 publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     selector: '#wrap',
     events: {
         'change input[name="o_delivery_radio"]': '_alCambiarMetodoEntrega',
         'click label.o_delivery_carrier_label': '_onClickDeliveryLabel',
         'change #sucursal_select': '_alCambiarSucursal',
-        // Interceptar el submit del formulario para validar
-        'submit form[name="checkout"]': '_onSubmitCheckout',
     },
 
     start: async function () {
-        console.log("🚀 Widget SelectorSucursales INICIADO");
+        console.log("🚀 Widget iniciado");
         this.rpc = this.bindService("rpc");
 
+        // Quitar preselección si existe
+        this._quitarPreseleccion();
+
         await this._cargarEstadoInicial();
+        this._interceptarBotonConfirmar();
 
         return this._super.apply(this, arguments);
+    },
+
+    /**
+     * SOLUCIÓN 1: Quitar preselección de métodos de entrega
+     */
+    _quitarPreseleccion: function () {
+        // Desmarcar todos los radio buttons al cargar
+        this.$('input[name="o_delivery_radio"]').prop('checked', false);
+        console.log("✅ Preselección removida");
     },
 
     _cargarEstadoInicial: async function () {
@@ -36,180 +43,215 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
                 console.log(`📥 Sucursal restaurada: ${data.sucursal}`);
             }
 
-            // ... dentro de _cargarEstadoInicial o start ...
+            // Solo verificar método si hay uno seleccionado
             setTimeout(() => {
-                // Deseleccionar todos los radio buttons de entrega si ninguno está 'seleccionado'
-                const $selectedRadio = this.$('input[name="o_delivery_radio"]:checked');
-                if (!$selectedRadio.length) {
-                    // Podrías intentar desmarcar todos para asegurar
-                    this.$('input[name="o_delivery_radio"]').prop('checked', false);
+                const $checked = this.$('input[name="o_delivery_radio"]:checked');
+                if ($checked.length > 0) {
+                    this._alCambiarMetodoEntrega();
                 }
-                this._alCambiarMetodoEntrega();
             }, 300);
-            // ...
 
         } catch (error) {
-            console.error("❌ Error al cargar estado inicial:", error);
-            setTimeout(() => {
-                this._alCambiarMetodoEntrega();
-            }, 300);
+            console.error("❌ Error inicial:", error);
         }
+    },
+
+    /**
+     * SOLUCIÓN 3: Interceptar el botón Confirmar
+     */
+    _interceptarBotonConfirmar: function () {
+        const self = this;
+
+        // Interceptar TODOS los posibles botones de confirmar
+        const selectores = [
+            'a.website_sale_main_button[href="/shop/confirm_order"]',
+            'a[href="/shop/confirm_order"]',
+            'button.website_sale_main_button',
+            'a:contains("Confirmar")',
+        ];
+
+        selectores.forEach(selector => {
+            this.$(selector).on('click', function (ev) {
+                console.log("🔴 BOTÓN CONFIRMAR CLICKEADO");
+
+                const $wrapper = self.$('#sucursal_picker_wrapper');
+
+                // Solo validar si las sucursales están visibles
+                if (!$wrapper.hasClass('d-none')) {
+                    const $select = self.$('#sucursal_select');
+                    const valor = $select.val();
+
+                    console.log(`🔍 Validando sucursal: "${valor}"`);
+
+                    if (!valor || valor === '' || valor === null) {
+                        // BLOQUEAR navegación
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        ev.stopImmediatePropagation();
+
+                        console.warn("⛔ BLOQUEADO - No hay sucursal");
+
+                        // Marcar error
+                        $select.addClass('is-invalid').removeClass('is-valid');
+                        self.$('#sucursal_error_msg').addClass('show');
+
+                        // Scroll
+                        $wrapper[0].scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+
+                        // Alert
+                        setTimeout(() => {
+                            alert('⚠️ Por favor, seleccione una sucursal antes de continuar.');
+                        }, 100);
+
+                        return false;
+                    } else {
+                        console.log("✅ Validación OK - Continuando");
+                    }
+                }
+            });
+        });
+
+        // También interceptar por clase directamente
+        document.addEventListener('click', function (e) {
+            const target = e.target.closest('a[href="/shop/confirm_order"]');
+            if (target) {
+                console.log("🔴 Click detectado vía addEventListener");
+
+                const $wrapper = self.$('#sucursal_picker_wrapper');
+                if (!$wrapper.hasClass('d-none')) {
+                    const $select = self.$('#sucursal_select');
+                    const valor = $select.val();
+
+                    if (!valor || valor === '') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+
+                        $select.addClass('is-invalid');
+                        self.$('#sucursal_error_msg').addClass('show');
+
+                        alert('⚠️ Por favor, seleccione una sucursal.');
+                        return false;
+                    }
+                }
+            }
+        }, true); // Usar capture phase
+
+        console.log("✅ Interceptores instalados");
     },
 
     _onClickDeliveryLabel: function (ev) {
         setTimeout(() => {
             this._alCambiarMetodoEntrega();
-        }, 50);
+        }, 100);
     },
 
     _alCambiarMetodoEntrega: function () {
-        console.log("🖱️ Evento _alCambiarMetodoEntrega() disparado");
+        const $checked = this.$('input[name="o_delivery_radio"]:checked');
 
-        const $radioSeleccionado = this.$('input[name="o_delivery_radio"]:checked');
-
-        if (!$radioSeleccionado.length) {
-            console.warn("⚠️ No se encontró ningún radio button seleccionado");
+        if (!$checked.length) {
             this._ocultarSucursales();
             return;
         }
 
-        const idRadio = $radioSeleccionado.attr('id');
+        const idRadio = $checked.attr('id');
         const $label = this.$('label[for="' + idRadio + '"]');
-        const textoLabel = $label.text().trim().toLowerCase();
-        const tipoEntrega = $radioSeleccionado.attr('data-delivery-type');
-        const precio = parseFloat($radioSeleccionado.attr('data-amount') || 0);
+        const texto = $label.text().trim().toLowerCase();
+        const tipo = $checked.attr('data-delivery-type');
+        const precio = parseFloat($checked.attr('data-amount') || 0);
 
-        console.log("📝 Texto del label:", textoLabel);
+        console.log(`📝 Método: "${texto}" | Tipo: ${tipo} | Precio: ${precio}`);
 
-        const esRecogerEnTienda = this._esMetodoRecogida(textoLabel, tipoEntrega, precio);
-
-        if (esRecogerEnTienda) {
-            console.log("✅ ES RECOGER EN TIENDA - Mostrando selector");
+        if (this._esMetodoRecogida(texto, tipo, precio)) {
+            console.log("✅ Es recoger en tienda");
             this._mostrarSucursales();
         } else {
-            console.log("👎 NO es recoger en tienda - Ocultando selector");
+            console.log("❌ No es recoger en tienda");
             this._ocultarSucursales();
         }
     },
 
-    _esMetodoRecogida: function (textoLabel, tipoEntrega, precio) {
-        const palabrasClave = ['recoger', 'tienda', 'sucursal', 'pickup', 'retirar'];
-        const tienePalabraClave = palabrasClave.some(palabra => textoLabel.includes(palabra));
-        const esFixedGratis = (tipoEntrega === 'fixed' && precio === 0);
+    _esMetodoRecogida: function (texto, tipo, precio) {
+        const palabras = ['recoger', 'tienda', 'sucursal', 'pickup', 'retirar'];
+        const tienePalabra = palabras.some(p => texto.includes(p));
+        const esGratis = (tipo === 'fixed' && precio === 0);
 
-        return tienePalabraClave || esFixedGratis;
-    },
-
-    _alCambiarSucursal: async function () {
-        const $selector = this.$('#sucursal_select');
-        $selector.removeClass('is-valid is-invalid'); // Añadir esta línea
-
-        const valorSucursal = $selector.val();
-
-        console.log(`🏦 Sucursal seleccionada: ${valorSucursal}`);
-
-        $selector.prop('disabled', true);
-
-        try {
-            const data = await this.rpc('/shop/update_sucursal', {
-                sucursal: valorSucursal
-            });
-
-            if (data.status === 'success') {
-                console.log(`✅ Sucursal guardada: ${data.sucursal_guardada}`);
-                $selector.removeClass('is-invalid').addClass('is-valid');
-            } else {
-                console.error(`❌ Error al guardar: ${data.error}`);
-                $selector.addClass('is-invalid');
-            }
-        } catch (error) {
-            console.error("❌ ERROR RPC:", error);
-            $selector.addClass('is-invalid');
-        } finally {
-            $selector.prop('disabled', false);
-        }
+        return tienePalabra || esGratis;
     },
 
     /**
-     * Valida que se haya seleccionado una sucursal antes de enviar el formulario
+     * SOLUCIÓN 2: No mostrar error en rojo al seleccionar
      */
-    _onSubmitCheckout: function (ev) {
-        const $radioSeleccionado = this.$('input[name="o_delivery_radio"]:checked');
-        const $contenedorSucursales = this.$('#sucursal_picker_wrapper');
+    _alCambiarSucursal: async function () {
+        const $select = this.$('#sucursal_select');
+        const valor = $select.val();
 
-        if ($radioSeleccionado.length) {
-            const idRadio = $radioSeleccionado.attr('id');
-            const $label = this.$('label[for="' + idRadio + '"]');
-            const textoLabel = $label.text().trim().toLowerCase();
-            const tipoEntrega = $radioSeleccionado.attr('data-delivery-type');
-            const precio = parseFloat($radioSeleccionado.attr('data-amount') || 0);
+        console.log(`🏦 Sucursal cambiada a: "${valor}"`);
 
-            const esRecogerEnTienda = this._esMetodoRecogida(textoLabel, tipoEntrega, precio);
+        // IMPORTANTE: Limpiar errores inmediatamente
+        $select.removeClass('is-invalid is-valid');
+        this.$('#sucursal_error_msg').removeClass('show');
 
-            // Validar si es método de recogida O si el contenedor está visible
-            if (esRecogerEnTienda || !$contenedorSucursales.hasClass('d-none')) {
-                const $selector = this.$('#sucursal_select');
-                const valorSucursal = $selector.val();
+        $select.prop('disabled', true);
 
-                if (!valorSucursal || valorSucursal === '') {
-                    ev.preventDefault();
-                    ev.stopPropagation();
+        try {
+            const data = await this.rpc('/shop/update_sucursal', {
+                sucursal: valor
+            });
 
-                    // Marcar el campo como inválido
-                    $selector.addClass('is-invalid');
-                    $contenedorSucursales.find('#sucursal_error_msg').removeClass('d-none'); // Mostrar mensaje de error
-
-                    // Hacer scroll y mostrar alerta (como ya lo tienes)
-                    $contenedorSucursales[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    alert('Por favor, seleccione una sucursal para recoger su pedido.');
-
-                    console.warn("⚠️ Formulario bloqueado: No se ha seleccionado sucursal");
-                    return false;
-                } else {
-                    // Si la validación es exitosa, asegúrate de quitar el mensaje de error
-                    $selector.removeClass('is-invalid');
-                    $contenedorSucursales.find('#sucursal_error_msg').addClass('d-none');
+            if (data.status === 'success') {
+                console.log(`✅ Guardado en backend`);
+                // Solo poner verde si hay valor válido
+                if (valor && valor !== '') {
+                    $select.addClass('is-valid');
                 }
             }
+        } catch (error) {
+            console.error("❌ Error RPC:", error);
+        } finally {
+            $select.prop('disabled', false);
         }
-
-        return true; // Continuar con el submit
     },
 
-
     _mostrarSucursales: function () {
-        const $contenedorSucursales = this.$('#sucursal_picker_wrapper');
+        const $wrapper = this.$('#sucursal_picker_wrapper');
 
-        if (!$contenedorSucursales.length) {
-            console.error("❌ ERROR: No se encontró #sucursal_picker_wrapper");
+        if (!$wrapper.length) {
+            console.error("❌ No existe #sucursal_picker_wrapper");
             return;
         }
 
-        $contenedorSucursales.removeClass('d-none').addClass('d-block');
-        this.$('#sucursal_select').prop('required', true);
+        $wrapper.removeClass('d-none').addClass('d-block');
 
         const $select = this.$('#sucursal_select');
-        if ($select.val() && $select.val() !== '') {
+        const valorActual = $select.val();
+
+        if (valorActual && valorActual !== '') {
             this._alCambiarSucursal();
         }
 
         setTimeout(() => {
-            $contenedorSucursales[0]?.scrollIntoView({
+            $wrapper[0]?.scrollIntoView({
                 behavior: 'smooth',
                 block: 'nearest'
             });
-        }, 100);
+        }, 150);
     },
 
     _ocultarSucursales: function () {
-        const $contenedorSucursales = this.$('#sucursal_picker_wrapper');
-        $contenedorSucursales.removeClass('d-block').addClass('d-none');
+        const $wrapper = this.$('#sucursal_picker_wrapper');
+        $wrapper.removeClass('d-block').addClass('d-none');
 
         const $select = this.$('#sucursal_select');
         $select.val('')
-            .prop('required', false)
             .removeClass('is-valid is-invalid');
 
+        this.$('#sucursal_error_msg').removeClass('show');
+
+        // Limpiar en backend
         this._alCambiarSucursal();
     },
 });

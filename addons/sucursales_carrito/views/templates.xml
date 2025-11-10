@@ -1,6 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- 1. QUITAR PRESELECCIÓN AUTOMÁTICA -->
+    <template id="quitar_preseleccion_delivery" inherit_id="website_sale_delivery.delivery_carrier_select">
+        <!-- Remover el atributo checked de todos los radio buttons -->
+        <xpath expr="//input[@name='o_delivery_radio'][@checked='checked']" position="attributes">
+            <attribute name="checked"/>
+        </xpath>
+    </template>
+
+    <!-- 2. SELECTOR DE SUCURSALES -->
     <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
+        
+        <!-- CSS personalizado -->
+        <xpath expr="//head" position="inside">
+            <style>
+                /* Forzar que ningún radio esté checked al cargar */
+                input[name="o_delivery_radio"] {
+                pointer-events: auto !important;
+                }
+                input[name="o_delivery_radio"]:checked {
+                background-color: #0d6efd;
+                border-color: #0d6efd;
+                }
+                /* Estilos para el selector de sucursales */
+                #sucursal_select {
+                    border: 2px solid #dee2e6;
+                    transition: all 0.3s ease;
+                }
+                #sucursal_select:focus {
+                    border-color: #0d6efd;
+                    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+                }
+                #sucursal_select.is-invalid {
+                    border-color: #dc3545 !important;
+                    background-image: none !important;
+                }
+                #sucursal_select.is-valid {
+                    border-color: #198754 !important;
+                    background-image: none !important;
+                }
+                #sucursal_error_msg {
+                    display: none;
+                    color: #dc3545;
+                    font-size: 0.875rem;
+                    margin-top: 0.5rem;
+                }
+                #sucursal_error_msg.show {
+                    display: block !important;
+                }
+            </style>
+        </xpath>
         
         <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="before">
             
@@ -18,9 +67,7 @@
                 <select name="sucursal_recogida_frontend" 
                         class="form-select form-select-lg" 
                         id="sucursal_select">
-                    <option value="" selected="selected">
-                        -- Seleccione una sucursal --
-                    </option>
+                    <option value="">-- Seleccione una sucursal --</option>
                     <option value="escuadron_201">📍 Escuadrón 201 #300, Antiguo Aereopuerto</option>
                     <option value="lazaro_cardenas">📍 Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía</option>
                     <option value="cosijoeza">📍 Calle Cosijoeza #216-A, Barrio de Jalatlaco</option>
@@ -33,9 +80,10 @@
                     <option value="vicente_guerrero">📍 Vicente Guerrero, Centro, Oaxaca</option>
                 </select>
                 
-                <small class="text-danger d-none mt-2" id="sucursal_error_msg">
+                <div id="sucursal_error_msg">
+                    <i class="fa fa-exclamation-triangle me-1"></i>
                     Por favor, seleccione una sucursal para continuar.
-                </small>
+                </div>
             </div>
         </xpath>
     </template>

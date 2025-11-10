@@ -59,3 +59,8 @@
     background-color: #e67e22 !important;
     /* más claro al pasar el cursor */
 }
+
+.custom_checkout_button[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

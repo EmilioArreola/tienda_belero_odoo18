@@ -2,7 +2,7 @@
 
 import publicWidget from "@web/legacy/js/public/public_widget";
 
-console.log("✅ sucursales_checkout.js v2.1 - Con Preselección");
+console.log("✅ sucursales_checkout.js v2.2 - Corrección de Preselección y Validación");
 
 publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     selector: '#wrap',
@@ -16,35 +16,39 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         console.log("🚀 Widget iniciado");
         this.rpc = this.bindService("rpc");
 
-        // REQ 1: Preseleccionar el envío por defecto
-        this._preseleccionarEnvioPorDefecto();
-
         await this._cargarEstadoInicial();
 
-        // REQ 2: Interceptar botón
+        // REQ 2: Interceptar botón (Restaurado con doble seguro)
         this._interceptarBotonConfirmar();
 
-        // Llamar a esto al final para ocultar el selector de sucursal
-        // (ya que el envío preseleccionado NO es "recoger")
+        // REQ 1: Preseleccionar con delay para ganar a Odoo
         setTimeout(() => {
+            console.log("Intentando preselección (con delay)...");
+            this._preseleccionarEnvioPorDefecto();
+            // Correr esto DESPUÉS de forzar la preselección
             this._alCambiarMetodoEntrega();
-        }, 100); // Dar un pequeño delay para asegurar que todo cargó
+        }, 300); // Dar 300ms a Odoo para que cargue su default
 
         return this._super.apply(this, arguments);
     },
 
     /**
-     * NUEVA FUNCIÓN (REQ 1): Preseleccionar "Envío (2-3 días hábiles)"
+     * CORREGIDO (REQ 1): 
+     * Ahora desmarca explícitamente cualquier radio que Odoo haya
+     * preseleccionado (como "Recoger en tienda") ANTES de
+     * marcar el nuestro.
      */
     _preseleccionarEnvioPorDefecto: function () {
-        // Texto a buscar (en minúsculas y sin acentos para ser más robusto)
         const textoEnvio = "envio (2-3 dias habiles)";
         const $labels = this.$('label.o_delivery_carrier_label');
         let found = false;
 
+        // ¡CORRECCIÓN! Desmarcar explícitamente el radio ya seleccionado
+        this.$('input[name="o_delivery_radio"]:checked').prop('checked', false);
+        console.log("Preselección de Odoo (Recoger) desmarcada.");
+
         $labels.each((i, label) => {
             const $label = $(label);
-            // Normalizar texto: quitar acentos, espacios extra y a minúsculas
             const labelText = $label.text().trim().toLowerCase()
                 .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
@@ -53,9 +57,6 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
                 if (radioId) {
                     const $radio = this.$('#' + radioId);
                     if ($radio.length) {
-                        // Desmarcar todos primero
-                        this.$('input[name="o_delivery_radio"]').prop('checked', false);
-                        // Marcar el correcto
                         $radio.prop('checked', true);
                         console.log(`✅ Preselección aplicada: ${textoEnvio}`);
                         found = true;
@@ -72,9 +73,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
     _cargarEstadoInicial: async function () {
         try {
-            // Esta ruta la agregamos en controllers/main.py
             const data = await this.rpc('/shop/get_sucursal', {});
-
             if (data.status === 'success' && data.sucursal) {
                 this.$('#sucursal_select').val(data.sucursal);
                 console.log(`📥 Sucursal restaurada: ${data.sucursal}`);
@@ -85,57 +84,93 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     },
 
     /**
-     * REQ 2: Interceptar el botón Confirmar
+     * CORREGIDO (REQ 2): 
+     * Se restaura el 'EventListener' en modo 'capture' (true).
+     * Esto es más agresivo y captura el clic ANTES de que Odoo
+     * procese el 'href' del enlace.
      */
     _interceptarBotonConfirmar: function () {
         const self = this;
         const botonSelector = 'a[href="/shop/confirm_order"]';
 
-        // Usar event delegation en un elemento estático superior
-        // Esto es más robusto que $(selector).on('click'...)
-        this.$el.on('click', botonSelector, function (ev) {
-            console.log("🔴 BOTÓN CONFIRMAR CLICKEADO");
-
-            const $wrapper = self.$('#sucursal_picker_wrapper');
-
-            // Solo validar si las sucursales están visibles
-            if ($wrapper.length > 0 && !$wrapper.hasClass('d-none')) {
-                const $select = self.$('#sucursal_select');
-                const valor = $select.val();
-
-                console.log(`🔍 Validando sucursal: "${valor}"`);
-
-                if (!valor || valor === '' || valor === null) {
-                    // BLOQUEAR navegación
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    ev.stopImmediatePropagation();
-
-                    console.warn("⛔ BLOQUEADO - No hay sucursal");
-
-                    // Marcar error
-                    $select.addClass('is-invalid').removeClass('is-valid');
-                    self.$('#sucursal_error_msg').addClass('show');
-
-                    // Scroll
-                    $wrapper[0].scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-
-                    // Alert
-                    setTimeout(() => {
-                        alert('⚠️ Por favor, seleccione una sucursal antes de continuar.');
-                    }, 100);
-
-                    return false;
+        // SEGURO 1: (El que tenías en v2.0)
+        // Este es el más importante. Se ejecuta en la fase de "captura".
+        document.addEventListener('click', function (e) {
+            // Usamos .closest() para ver si el clic fue en el botón o en un hijo
+            const target = e.target.closest(botonSelector);
+            if (target) {
+                console.log("🔴 Clic capturado por addEventListener (fase capture)");
+                if (self._validarSucursal()) {
+                    // Si la validación pasa, permite el clic
+                    console.log("✅ Validación OK (EventListener)");
+                    return true;
                 } else {
-                    console.log("✅ Validación OK - Continuando");
+                    // Si la validación falla, bloquea el evento
+                    console.warn("⛔ BLOQUEADO por addEventListener");
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    return false;
                 }
+            }
+        }, true); // El 'true' es la clave, se ejecuta en fase de captura
+
+        // SEGURO 2: (El de Odoo)
+        // Por si acaso, dejamos también el listener de Odoo.
+        this.$el.on('click', botonSelector, function (ev) {
+            console.log("🔴 Clic capturado por Odoo .on()");
+            if (!self._validarSucursal()) {
+                console.warn("⛔ BLOQUEADO por Odoo .on()");
+                ev.preventDefault();
+                ev.stopPropagation();
+                ev.stopImmediatePropagation();
+            } else {
+                console.log("✅ Validación OK (Odoo .on())");
             }
         });
 
-        console.log("✅ Interceptor de clic instalado");
+        console.log("✅ Interceptores (Doble) instalados");
+    },
+
+    /**
+     * Nueva función de apoyo para validar (y evitar repetir código)
+     */
+    _validarSucursal: function () {
+        const $wrapper = this.$('#sucursal_picker_wrapper');
+
+        // Si el wrapper no está visible, no hay nada que validar.
+        if (!$wrapper.length || $wrapper.hasClass('d-none')) {
+            return true; // Es válido continuar
+        }
+
+        // Si el wrapper SÍ está visible, validamos el select
+        const $select = this.$('#sucursal_select');
+        const valor = $select.val();
+
+        if (!valor || valor === '' || valor === null) {
+            // --- Validación FALLIDA ---
+            console.warn("⛔ Validación fallida: No hay sucursal seleccionada");
+
+            // Marcar error
+            $select.addClass('is-invalid').removeClass('is-valid');
+            this.$('#sucursal_error_msg').addClass('show');
+
+            // Scroll
+            $wrapper[0].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+
+            // Alert
+            setTimeout(() => {
+                alert('⚠️ Por favor, seleccione una sucursal antes de continuar.');
+            }, 100);
+
+            return false; // Inválido
+        }
+
+        // --- Validación EXITOSA ---
+        return true; // Es válido continuar
     },
 
     _onClickDeliveryLabel: function (ev) {
@@ -146,7 +181,6 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
     _alCambiarMetodoEntrega: function () {
         const $checked = this.$('input[name="o_delivery_radio"]:checked');
-
         if (!$checked.length) {
             this._ocultarSucursales();
             return;
@@ -172,31 +206,24 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     _esMetodoRecogida: function (texto, tipo, precio) {
         const palabras = ['recoger', 'tienda', 'sucursal', 'pickup', 'retirar'];
         const tienePalabra = palabras.some(p => texto.includes(p));
-        const esGratis = (tipo === 'fixed' && precio === 0); // "Recoger en tienda" es gratis
-
+        const esGratis = (tipo === 'fixed' && precio === 0);
         return tienePalabra || esGratis;
     },
 
     _alCambiarSucursal: async function () {
         const $select = this.$('#sucursal_select');
         const valor = $select.val();
-
         console.log(`🏦 Sucursal cambiada a: "${valor}"`);
 
-        // Limpiar errores inmediatamente
+        // Limpiar errores en cuanto el usuario cambia la selección
         $select.removeClass('is-invalid is-valid');
         this.$('#sucursal_error_msg').removeClass('show');
 
         $select.prop('disabled', true);
-
         try {
-            const data = await this.rpc('/shop/update_sucursal', {
-                sucursal: valor
-            });
-
+            const data = await this.rpc('/shop/update_sucursal', { sucursal: valor });
             if (data.status === 'success') {
                 console.log(`✅ Guardado en backend`);
-                // Solo poner verde si hay valor válido
                 if (valor && valor !== '') {
                     $select.addClass('is-valid');
                 }
@@ -211,12 +238,10 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     _mostrarSucursales: function () {
         const $wrapper = this.$('#sucursal_picker_wrapper');
         if (!$wrapper.length) { return; }
-
         $wrapper.removeClass('d-none').addClass('d-block');
 
         const $select = this.$('#sucursal_select');
         const valorActual = $select.val();
-
         if (valorActual && valorActual !== '') {
             this._alCambiarSucursal();
         }
@@ -234,13 +259,10 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         $wrapper.removeClass('d-block').addClass('d-none');
 
         const $select = this.$('#sucursal_select');
-        $select.val('')
-            .removeClass('is-valid is-invalid');
-
+        $select.val('').removeClass('is-valid is-invalid');
         this.$('#sucursal_error_msg').removeClass('show');
 
-        // Limpiar en backend
-        this._alCambiarSucursal();
+        this._alCambiarSucursal(); // Limpiar en backend
     },
 });
 

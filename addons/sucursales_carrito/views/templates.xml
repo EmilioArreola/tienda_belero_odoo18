@@ -1,40 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
-    <!-- 1️⃣ Herencia del checkout (para mostrar el selector de sucursal) -->
-    <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
+    <!-- 1️⃣ Herencia del checkout para agregar el selector de sucursal -->
+    <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout" name="Checkout con selector de sucursal">
+
+        <!-- Agregar selector ANTES de los datos de facturación -->
         <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="before">
 
-            <style>
-                /* Estilos para el selector de sucursales */
-                #sucursal_select {
-                    border: 2px solid #dee2e6;
-                    transition: all 0.3s ease;
-                }
-                #sucursal_select:focus {
-                    border-color: #0d6efd;
-                    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-                }
-                #sucursal_select.is-invalid {
-                    border-color: #dc3545 !important;
-                    background-image: none !important;
-                }
-                #sucursal_select.is-valid {
-                    border-color: #198754 !important;
-                    background-image: none !important;
-                }
-                /* Mensaje de error */
-                #sucursal_error_msg {
-                    color: #dc3545;
-                    font-size: 0.875rem;
-                    margin-top: 0.5rem;
-                }
-                #sucursal_error_msg.show {
-                    display: block !important;
-                }
-            </style>
-
-            <div class="mb-4 d-none" id="sucursal_picker_wrapper">
+            <div class="mb-4" id="sucursal_picker_wrapper">
 
                 <h4 class="fs-6 small text-uppercase fw-bolder text-primary">
                     <i class="fa fa-map-marker me-2"></i>
@@ -48,10 +21,10 @@
 
                 <select name="sucursal_recogida_frontend" class="form-select form-select-lg" id="sucursal_select">
                     <option value="">-- Seleccione una sucursal --</option>
-                    <option value="escuadron_201">📍 Escuadrón 201 #300, Antiguo Aereopuerto</option>
-                    <option value="lazaro_cardenas">📍 Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía</option>
+                    <option value="escuadron_201">📍 Escuadrón 201 #300, Antiguo Aeropuerto</option>
+                    <option value="lazaro_cardenas">📍 Av. Lázaro Cárdenas 503-3, Col. Guelatao</option>
                     <option value="cosijoeza">📍 Calle Cosijoeza #216-A, Barrio de Jalatlaco</option>
-                    <option value="eucaliptos">📍 Eucaliptos #215 В, Col. Reforma, 68050</option>
+                    <option value="eucaliptos">📍 Eucaliptos #215B, Col. Reforma</option>
                     <option value="riveras">📍 Libramiento Riveras del Atoyac #122-2</option>
                     <option value="diaz_ordaz">📍 Díaz Ordaz #710, Col. Centro</option>
                     <option value="eduardo_mata">📍 Av. Eduardo Mata #2302, Periférico</option>
@@ -66,26 +39,14 @@
                 </div>
 
             </div>
+
         </xpath>
+
+        <!-- Agregar id personalizado al botón CONTINUAR -->
+        <xpath expr="//button[@id='o_payment_submit_button']" position="attributes">
+            <attribute name="class">btn btn-primary o_payment_submit_button custom_checkout_button</attribute>
+        </xpath>
+
     </template>
-
-    <!-- 2️⃣ Herencia del botón confirmar 
-    <template id="agregar_id_a_boton_confirmar" inherit_id="website_sale.confirm_button">
-        <xpath expr="//a[@name='website_sale_main_button']" position="attributes">
-            <attribute name="id">boton_confirmar_checkout</attribute>
-        </xpath>
-    </template> -->
-
-<template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
-    <!-- Tu primer xpath con el selector -->
-    <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="before">
-        <!-- ... (todo tu código del selector) ... -->
-    </xpath>
-
-    <!-- Este xpath agrega el id al botón Confirmar -->
-    <xpath expr="//a[@name='website_sale_main_button']" position="attributes">
-        <attribute name="id">boton_confirmar_checkout</attribute>
-    </xpath>
-</template>
 
 </odoo>

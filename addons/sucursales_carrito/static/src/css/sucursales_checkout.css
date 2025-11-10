@@ -1,0 +1,28 @@
+#sucursal_error_msg {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+#sucursal_error_msg.d-none {
+    display: none !important;
+}
+
+#sucursal_error_msg.show {
+    display: block !important;
+}
+
+/* Cambiar color del botón de sucursal */
+#select_branch_button {
+    background-color: #d35400;
+    color: white;
+    border-radius: 8px;
+    padding: 10px 15px;
+}
+
+/* Ajustar estilo del dropdown */
+.branch-selector select {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 5px;
+}

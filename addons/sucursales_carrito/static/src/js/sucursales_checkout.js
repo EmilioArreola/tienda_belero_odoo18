@@ -39,7 +39,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
      * marcar el nuestro.
      */
     _preseleccionarEnvioPorDefecto: function () {
-        const textoEnvio = "envio (2-3 dias habiles)";
+        const textoEnvio = "Envío (2-3 días hábiles)";
         const $labels = this.$('label.o_delivery_carrier_label');
         let found = false;
 
@@ -153,7 +153,8 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
             // Marcar error
             $select.addClass('is-invalid').removeClass('is-valid');
-            this.$('#sucursal_error_msg').addClass('show');
+            this.$('#sucursal_error_msg').removeClass('d-none').addClass('show');
+
 
             // Scroll
             $wrapper[0].scrollIntoView({
@@ -215,9 +216,10 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         const valor = $select.val();
         console.log(`🏦 Sucursal cambiada a: "${valor}"`);
 
-        // Limpiar errores en cuanto el usuario cambia la selección
+        // Limpiar errores
         $select.removeClass('is-invalid is-valid');
-        this.$('#sucursal_error_msg').removeClass('show');
+        this.$('#sucursal_error_msg').addClass('d-none').removeClass('show');
+
 
         $select.prop('disabled', true);
         try {
@@ -232,13 +234,39 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
             console.error("❌ Error RPC:", error);
         } finally {
             $select.prop('disabled', false);
+            this._actualizarEstadoBotonConfirmar(); // 👈 aquí
         }
     },
+    _actualizarEstadoBotonConfirmar: function () {
+        const $boton = this.$('#boton_confirmar_checkout');
+        const $wrapper = this.$('#sucursal_picker_wrapper');
+        const $select = this.$('#sucursal_select');
+        const $errorMsg = this.$('#sucursal_error_msg');
+
+        // Si no está visible la sección de sucursal, botón activo
+        if (!$wrapper.length || $wrapper.hasClass('d-none')) {
+            $boton.removeAttr('disabled');
+            $errorMsg.addClass('d-none');
+            return;
+        }
+
+        // Si está visible, validar selección
+        const valor = $select.val();
+        if (!valor || valor === '') {
+            $boton.attr('disabled', true);
+            $errorMsg.removeClass('d-none'); // Mostrar error
+        } else {
+            $boton.removeAttr('disabled');
+            $errorMsg.addClass('d-none'); // Ocultar error
+        }
+    },
+
 
     _mostrarSucursales: function () {
         const $wrapper = this.$('#sucursal_picker_wrapper');
         if (!$wrapper.length) { return; }
         $wrapper.removeClass('d-none').addClass('d-block');
+        this._actualizarEstadoBotonConfirmar();
 
         const $select = this.$('#sucursal_select');
         const valorActual = $select.val();
@@ -263,6 +291,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         this.$('#sucursal_error_msg').removeClass('show');
 
         this._alCambiarSucursal(); // Limpiar en backend
+        this._actualizarEstadoBotonConfirmar();
     },
 });
 

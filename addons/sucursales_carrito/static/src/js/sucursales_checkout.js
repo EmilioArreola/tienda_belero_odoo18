@@ -2,7 +2,7 @@
 
 import publicWidget from "@web/legacy/js/public/public_widget";
 
-console.log("✅ sucursales_checkout.js v2.0 - DEFINITIVO");
+console.log("✅ sucursales_checkout.js v2.1 - Con Preselección");
 
 publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     selector: '#wrap',
@@ -16,23 +16,60 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         console.log("🚀 Widget iniciado");
         this.rpc = this.bindService("rpc");
 
-        // Quitar preselección si existe
-        this._quitarPreseleccion();
+        // REQ 1: Preseleccionar el envío por defecto
+        this._preseleccionarEnvioPorDefecto();
 
         await this._cargarEstadoInicial();
+
+        // REQ 2: Interceptar botón (esto ya estaba en tu v2.0)
         this._interceptarBotonConfirmar();
+
+        // Llamar a esto al final para ocultar el selector de sucursal
+        // (ya que el envío preseleccionado NO es "recoger")
+        setTimeout(() => {
+            this._alCambiarMetodoEntrega();
+        }, 100); // Dar un pequeño delay para asegurar que todo cargó
 
         return this._super.apply(this, arguments);
     },
 
     /**
-     * SOLUCIÓN 1: Quitar preselección de métodos de entrega
+     * NUEVA FUNCIÓN (REQ 1): Preseleccionar "Envío (2-3 días hábiles)"
      */
-    _quitarPreseleccion: function () {
-        // Desmarcar todos los radio buttons al cargar
-        this.$('input[name="o_delivery_radio"]').prop('checked', false);
-        console.log("✅ Preselección removida");
+    _preseleccionarEnvioPorDefecto: function () {
+        // Texto a buscar (en minúsculas y sin acentos para ser más robusto)
+        const textoEnvio = "envio (2-3 dias habiles)";
+        const $labels = this.$('label.o_delivery_carrier_label');
+        let found = false;
+
+        $labels.each((i, label) => {
+            const $label = $(label);
+            // Normalizar texto: quitar acentos, espacios extra y a minúsculas
+            const labelText = $label.text().trim().toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+            if (labelText.includes(textoEnvio)) {
+                const radioId = $label.attr('for');
+                if (radioId) {
+                    const $radio = this.$('#' + radioId);
+                    if ($radio.length) {
+                        $radio.prop('checked', true);
+                        console.log(`✅ Preselección aplicada: ${textoEnvio}`);
+                        found = true;
+                        return false; // Salir del 'each'
+                    }
+                }
+            }
+        });
+
+        if (!found) {
+            console.warn(`⚠️ No se pudo preseleccionar el envío "${textoEnvio}"`);
+        }
     },
+
+    /**
+     * FUNCIÓN ELIMINADA: _quitarPreseleccion
+     */
 
     _cargarEstadoInicial: async function () {
         try {
@@ -42,22 +79,14 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
                 this.$('#sucursal_select').val(data.sucursal);
                 console.log(`📥 Sucursal restaurada: ${data.sucursal}`);
             }
-
-            // Solo verificar método si hay uno seleccionado
-            setTimeout(() => {
-                const $checked = this.$('input[name="o_delivery_radio"]:checked');
-                if ($checked.length > 0) {
-                    this._alCambiarMetodoEntrega();
-                }
-            }, 300);
-
         } catch (error) {
             console.error("❌ Error inicial:", error);
         }
     },
 
     /**
-     * SOLUCIÓN 3: Interceptar el botón Confirmar
+     * REQ 2: Interceptar el botón Confirmar (Tu código v2.0 ya hace esto)
+     * Esta función ya hace lo que pides: muestra el error en rojo y un alert.
      */
     _interceptarBotonConfirmar: function () {
         const self = this;
@@ -115,13 +144,14 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         });
 
         // También interceptar por clase directamente
+        // (Este es un segundo seguro, por si el 'on' de Odoo falla)
         document.addEventListener('click', function (e) {
             const target = e.target.closest('a[href="/shop/confirm_order"]');
             if (target) {
                 console.log("🔴 Click detectado vía addEventListener");
 
                 const $wrapper = self.$('#sucursal_picker_wrapper');
-                if (!$wrapper.hasClass('d-none')) {
+                if ($wrapper.length > 0 && !$wrapper.hasClass('d-none')) {
                     const $select = self.$('#sucursal_select');
                     const valor = $select.val();
 
@@ -177,6 +207,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     _esMetodoRecogida: function (texto, tipo, precio) {
         const palabras = ['recoger', 'tienda', 'sucursal', 'pickup', 'retirar'];
         const tienePalabra = palabras.some(p => texto.includes(p));
+        // Tu "Recoger en tienda" es "Gratis", por eso funciona esta lógica
         const esGratis = (tipo === 'fixed' && precio === 0);
 
         return tienePalabra || esGratis;
@@ -184,6 +215,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
     /**
      * SOLUCIÓN 2: No mostrar error en rojo al seleccionar
+     * (Tu código v2.0 ya hace esto bien)
      */
     _alCambiarSucursal: async function () {
         const $select = this.$('#sucursal_select');

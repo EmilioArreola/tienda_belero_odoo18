@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- 1. QUITAR PRESELECCIÓN AUTOMÁTICA -->
-    <template id="quitar_preseleccion_delivery" inherit_id="website_sale_delivery.delivery_carrier_select">
-        <!-- Remover el atributo checked de todos los radio buttons -->
-        <xpath expr="//input[@name='o_delivery_radio'][@checked='checked']" position="attributes">
-            <attribute name="checked"/>
-        </xpath>
-    </template>
 
     <!-- 2. SELECTOR DE SUCURSALES -->
     <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">

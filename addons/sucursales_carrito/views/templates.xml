@@ -2,7 +2,8 @@
 <odoo>
     <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
         
-        <xpath expr="//head" position="inside">
+        <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="before">
+            
             <style>
                 /* Estilos para el selector de sucursales */
                 #sucursal_select {
@@ -32,9 +33,7 @@
                     display: block !important; /* Mostrado por JS */
                 }
             </style>
-        </xpath>
-        
-        <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="before">
+
             <div class="mb-4 d-none" id="sucursal_picker_wrapper">
                 <h4 class="fs-6 small text-uppercase fw-bolder text-primary">
                     <i class="fa fa-map-marker me-2"></i>
@@ -66,5 +65,6 @@
                 </div>
             </div>
         </xpath>
+
     </template>
 </odoo>

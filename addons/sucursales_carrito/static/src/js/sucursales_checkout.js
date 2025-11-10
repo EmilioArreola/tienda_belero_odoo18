@@ -21,7 +21,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
         await this._cargarEstadoInicial();
 
-        // REQ 2: Interceptar botón (esto ya estaba en tu v2.0)
+        // REQ 2: Interceptar botón
         this._interceptarBotonConfirmar();
 
         // Llamar a esto al final para ocultar el selector de sucursal
@@ -72,7 +72,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
     _cargarEstadoInicial: async function () {
         try {
-            // Esta ruta la agregué en controllers/main.py
+            // Esta ruta la agregamos en controllers/main.py
             const data = await this.rpc('/shop/get_sucursal', {});
 
             if (data.status === 'success' && data.sucursal) {
@@ -131,7 +131,6 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
                     return false;
                 } else {
                     console.log("✅ Validación OK - Continuando");
-                    S
                 }
             }
         });
@@ -220,7 +219,6 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
         if (valorActual && valorActual !== '') {
             this._alCambiarSucursal();
-            s
         }
 
         setTimeout(() => {

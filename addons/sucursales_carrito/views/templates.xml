@@ -69,11 +69,23 @@
         </xpath>
     </template>
 
-    <!-- 2️⃣ Herencia del botón confirmar -->
+    <!-- 2️⃣ Herencia del botón confirmar 
     <template id="agregar_id_a_boton_confirmar" inherit_id="website_sale.confirm_button">
         <xpath expr="//a[@name='website_sale_main_button']" position="attributes">
             <attribute name="id">boton_confirmar_checkout</attribute>
         </xpath>
-    </template>
+    </template> -->
+
+<template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout">
+    <!-- Tu primer xpath con el selector -->
+    <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="before">
+        <!-- ... (todo tu código del selector) ... -->
+    </xpath>
+
+    <!-- Este xpath agrega el id al botón Confirmar -->
+    <xpath expr="//a[@name='website_sale_main_button']" position="attributes">
+        <attribute name="id">boton_confirmar_checkout</attribute>
+    </xpath>
+</template>
 
 </odoo>

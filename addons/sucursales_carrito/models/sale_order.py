@@ -6,16 +6,7 @@ class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
     sucursal_recogida = fields.Selection([
-        ('escuadron_201', 'Escuadrón 201 #300, Antiguo Aereopuerto'),
-        ('lazaro_cardenas', 'Av Lázaro Cárdenas 503-3, Col. Guelatao, Santa Lucía'),
-        ('cosijoeza', 'Calle Cosijoeza #216-A, Barrio de Jalatlaco'),
-        ('eucaliptos', 'Eucaliptos #215 В, Col. Reforma, 68050'),
-        ('riveras', 'Libramiento Riveras del Atoyac #122-2'),
-        ('diaz_ordaz', 'Díaz Ordaz #710, Col. Centro'),
-        ('eduardo_mata', 'Av. Eduardo Mata #2302, Periférico'),
-        ('cristobal_colon', 'Carretera Cristóbal Colón #202, Santa Rosa'),
-        ('yagul', 'Calle Yagul esq. Cosijopi #122-A'),
-        ('vicente_guerrero', 'Vicente Guerrero, Centro, Oaxaca'),
+        # ... (tus sucursales, no cambian) ...
     ], string='Sucursal de Recogida', 
        copy=False,
        tracking=True,
@@ -24,29 +15,24 @@ class SaleOrder(models.Model):
     def _es_metodo_recogida(self):
         """
         Determina si el carrier actual es de tipo "recoger en tienda"
+        basado en el campo booleano 'es_recogida_tienda' del método.
         """
         self.ensure_one()
+        
+        # Si no hay método de envío seleccionado, no es recogida
         if not self.carrier_id:
             return False
         
-        carrier = self.carrier_id
-        
-        # Opción 1: Por nombre del carrier
-        if carrier.name and any(palabra in carrier.name.lower() 
-                               for palabra in ['recoger', 'tienda', 'sucursal', 'pickup', 'retirar']):
-            return True
-        
-        # Opción 2: Por tipo de entrega fixed con precio 0
-        if carrier.delivery_type == 'fixed' and carrier.fixed_price == 0:
-            return True
-        
-        return False
+        # Devuelve directamente el valor del campo booleano
+        # Esto es mucho más robusto que adivinar por el nombre o precio.
+        return self.carrier_id.es_recogida_tienda
 
     def action_confirm(self):
         """
         Valida que haya sucursal seleccionada SOLO al momento de confirmar
         """
         for order in self:
+            # La validación ahora usa la función corregida
             if order._es_metodo_recogida() and not order.sucursal_recogida:
                 raise UserError(_(
                     'Debe seleccionar una sucursal de recogida antes de confirmar el pedido.\n\n'

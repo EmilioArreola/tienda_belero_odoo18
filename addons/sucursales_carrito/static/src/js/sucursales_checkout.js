@@ -144,13 +144,15 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
         const idRadio = $checked.attr('id');
         const $label = this.$('label[for="' + idRadio + '"]');
-        const texto = $label.text().trim().toLowerCase();
-        const tipo = $checked.attr('data-delivery-type');
-        const precio = parseFloat($checked.attr('data-amount') || 0);
 
-        console.log(`📝 Método: "${texto}" | Tipo: ${tipo} | Precio: ${precio}`);
+        // 🔹 LEEMOS EL NUEVO ATRIBUTO DEL XML
+        // Esto será "true" o "false" (como string)
+        const esRecogida = $checked.attr('data-es-recogida');
 
-        if (this._esMetodoRecogida(texto, tipo, precio)) {
+        console.log(`📝 Método: "${$label.text().trim()}" | Data Es Recogida: ${esRecogida}`);
+
+        // 🔹 Pasamos el nuevo valor a nuestra función de lógica
+        if (this._esMetodoRecogida(esRecogida)) {
             console.log("✅ Es recoger en tienda");
             this._mostrarSucursales();
         } else {
@@ -159,11 +161,10 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         }
     },
 
-    _esMetodoRecogida: function (texto, tipo, precio) {
-        const palabras = ['recoger', 'tienda', 'sucursal', 'pickup', 'retirar'];
-        const tienePalabra = palabras.some(p => texto.includes(p));
-        const esGratis = (tipo === 'fixed' && precio === 0);
-        return tienePalabra || esGratis;
+    _esMetodoRecogida: function (esRecogida) {
+        // El atributo HTML será el string "true" si el campo booleano es True.
+        // Cualquier otro valor ("false", undefined) se considerará falso.
+        return esRecogida === "true";
     },
 
     _alCambiarSucursal: async function () {

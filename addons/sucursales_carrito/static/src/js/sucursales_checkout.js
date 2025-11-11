@@ -194,6 +194,23 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         }
     },
 
+    _limpiarSucursalEnBackend: function () {
+        console.log("🧹 Limpiando sucursal en backend...");
+
+        // Esta función llama al backend para poner la sucursal en 'False'
+        // pero NO es 'async' a propósito, para evitar "race conditions".
+        // Simplemente "dispara y olvida".
+        this._rpc('/shop/update_sucursal', { sucursal: "" })
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log(`✅ Sucursal limpiada en backend`);
+                }
+            })
+            .catch(error => {
+                console.error("❌ Error RPC al limpiar sucursal:", error);
+            });
+    },
+
     _actualizarEstadoBotonConfirmar: function () {
         // 🔹 Cambiado para buscar el botón "Continuar" del checkout
         const $boton = this.$('a[href="/shop/payment"], button[name="o_payment"]');
@@ -246,7 +263,9 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         $select.val('').removeClass('is-valid is-invalid');
         this.$('#sucursal_error_msg').removeClass('show');
 
-        this._alCambiarSucursal();
+        // ✅ REEMPLAZAMOS LA LÍNEA MALA POR LA NUEVA FUNCIÓN:
+        this._limpiarSucursalEnBackend();
+
         this._actualizarEstadoBotonConfirmar();
     },
 });

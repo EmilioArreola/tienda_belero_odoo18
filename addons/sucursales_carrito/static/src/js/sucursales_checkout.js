@@ -8,13 +8,11 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     selector: '#wrap',
     events: {
         'change input[name="o_delivery_radio"]': '_alCambiarMetodoEntrega',
-        'click label.o_delivery_carrier_label': '_onClickDeliveryLabel',
         'change #sucursal_select': '_alCambiarSucursal',
     },
 
     start: async function () {
         console.log("🚀 Widget iniciado");
-        this.rpc = this.bindService("rpc");
 
         await this._cargarEstadoInicial();
 
@@ -65,7 +63,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
     _cargarEstadoInicial: async function () {
         try {
-            const data = await this.rpc('/shop/get_sucursal', {});
+            const data = await this._rpc('/shop/get_sucursal', {});
             if (data.status === 'success' && data.sucursal) {
                 this.$('#sucursal_select').val(data.sucursal);
                 console.log(`📥 Sucursal restaurada: ${data.sucursal}`);
@@ -129,12 +127,6 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         return true;
     },
 
-    _onClickDeliveryLabel: function (ev) {
-        setTimeout(() => {
-            this._alCambiarMetodoEntrega();
-        }, 100);
-    },
-
     _alCambiarMetodoEntrega: async function () {
         const $checked = this.$('input[name="o_delivery_radio"]:checked');
         if (!$checked.length) {
@@ -168,7 +160,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
         try {
             // 🔹 Llamamos a la nueva ruta del controlador
-            const data = await this.rpc('/shop/es_recogida', {
+            const data = await this._rpc('/shop/es_recogida', {
                 carrier_id: carrier_id
             });
 
@@ -191,7 +183,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
         $select.prop('disabled', true);
         try {
-            const data = await this.rpc('/shop/update_sucursal', { sucursal: valor });
+            const data = await this._rpc('/shop/update_sucursal', { sucursal: valor });
             if (data.status === 'success') {
                 console.log(`✅ Guardado en backend`);
                 if (valor && valor !== '') {

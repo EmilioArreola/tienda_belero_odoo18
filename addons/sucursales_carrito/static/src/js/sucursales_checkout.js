@@ -12,21 +12,23 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     },
 
     start: async function () {
+        // ⬇️ ESTA ES LA CORRECCIÓN ⬇️
+        // 1. Llama a 'super' PRIMERO y usa 'await'
+        await this._super.apply(this, arguments);
+
         console.log("🚀 Widget iniciado");
 
+        // 2. Ahora sí, ejecuta el resto de tu lógica async
         await this._cargarEstadoInicial();
-
-        // Interceptor del botón "Continuar" del checkout
         this._interceptarBotonConfirmar();
 
-        // Preseleccionar método de envío
         setTimeout(() => {
             console.log("Intentando preselección (con delay)...");
             this._preseleccionarEnvioPorDefecto();
             this._alCambiarMetodoEntrega();
         }, 300);
 
-        return this._super.apply(this, arguments);
+        // 3. Ya no se necesita el 'return' de super aquí al final.
     },
 
     _preseleccionarEnvioPorDefecto: function () {

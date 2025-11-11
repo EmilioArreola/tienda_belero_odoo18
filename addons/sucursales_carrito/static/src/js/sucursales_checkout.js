@@ -135,7 +135,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         }, 100);
     },
 
-    _alCambiarMetodoEntrega: function () {
+    _alCambiarMetodoEntrega: async function () {
         const $checked = this.$('input[name="o_delivery_radio"]:checked');
         if (!$checked.length) {
             this._ocultarSucursales();
@@ -145,14 +145,14 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         const idRadio = $checked.attr('id');
         const $label = this.$('label[for="' + idRadio + '"]');
 
-        // 🔹 LEEMOS EL NUEVO ATRIBUTO DEL XML
-        // Esto será "true" o "false" (como string)
-        const esRecogida = $checked.attr('data-es-recogida');
+        // 🔹 OBTENEMOS EL ID DEL MÉTODO DE ENVÍO
+        // El valor del input radio es el ID del delivery.carrier
+        const carrier_id = $checked.val();
 
-        console.log(`📝 Método: "${$label.text().trim()}" | Data Es Recogida: ${esRecogida}`);
+        console.log(`📝 Método: "${$label.text().trim()}" | ID: ${carrier_id}`);
 
-        // 🔹 Pasamos el nuevo valor a nuestra función de lógica
-        if (this._esMetodoRecogida(esRecogida)) {
+        // 🔹 PREGUNTAMOS AL SERVIDOR SI ES RECOGIDA
+        if (await this._esMetodoRecogida(carrier_id)) {
             console.log("✅ Es recoger en tienda");
             this._mostrarSucursales();
         } else {
@@ -161,10 +161,24 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         }
     },
 
-    _esMetodoRecogida: function (esRecogida) {
-        // El atributo HTML será el string "true" si el campo booleano es True.
-        // Cualquier otro valor ("false", undefined) se considerará falso.
-        return esRecogida === "true";
+    _esMetodoRecogida: async function (carrier_id) {
+        if (!carrier_id) {
+            return false;
+        }
+
+        try {
+            // 🔹 Llamamos a la nueva ruta del controlador
+            const data = await this.rpc('/shop/es_recogida', {
+                carrier_id: carrier_id
+            });
+
+            // Devolvemos la respuesta del servidor (true o false)
+            return data.es_recogida;
+
+        } catch (error) {
+            console.error("❌ Error RPC al verificar método de recogida:", error);
+            return false; // Asumimos falso si hay un error
+        }
     },
 
     _alCambiarSucursal: async function () {

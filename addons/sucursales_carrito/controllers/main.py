@@ -35,4 +35,25 @@ class SucursalCheckout(http.Controller):
         if order and order.sucursal_recogida:
             return {'status': 'success', 'sucursal': order.sucursal_recogida}
         # Si no hay orden o no hay sucursal, no devuelve nada
-        return {'status': 'error', 'sucursal': False}   
+        return {'status': 'error', 'sucursal': False}
+    @http.route(['/shop/es_recogida'], type='json', auth="public", website=True)
+    def es_metodo_recogida(self, carrier_id=None, **kwargs):
+        """
+        Comprueba si un delivery_carrier_id es de tipo "recogida en tienda"
+        y devuelve True o False.
+        """
+        if not carrier_id:
+            return {'es_recogida': False}
+        
+        try:
+            # Buscamos el método de envío en el backend
+            carrier = request.env['delivery.carrier'].sudo().browse(int(carrier_id))
+            
+            if carrier.exists() and carrier.es_recogida_tienda:
+                return {'es_recogida': True}
+            else:
+                return {'es_recogida': False}
+        
+        except Exception as e:
+            # Si algo falla (ej. el ID no es un número), asumimos que no es recogida
+            return {'es_recogida': False}

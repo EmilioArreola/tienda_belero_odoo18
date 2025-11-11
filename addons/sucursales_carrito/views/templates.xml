@@ -52,12 +52,4 @@
         </xpath>
     </template>
 
-    <template id="mi_delivery_carrier_radio_data" 
-              inherit_id="website_sale_delivery.payment_delivery_methods_radio">
-        
-        <xpath expr="//input[@name='o_delivery_radio']" position="attributes">
-            <attribute name="t-att-data-es-recogida">carrier.es_recogida_tienda</attribute>
-        </xpath>
-    </template>
-
 </odoo>

@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
-    <!-- 1️⃣ Herencia del checkout para agregar el selector de sucursal -->
     <template id="mi_checkout_con_sucursales" inherit_id="website_sale.checkout" name="Checkout con selector de sucursal">
 
-        <!-- Agregar selector ANTES de los datos de facturación -->
         <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="before">
 
             <div class="mb-4" id="sucursal_picker_wrapper">
@@ -42,14 +40,6 @@
 
         </xpath>
 
-        <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="before">
-            <div class="mb-4" id="sucursal_picker_wrapper">
-                </div>
-        </xpath>
-
-        <xpath expr="//a[@href='/shop/payment']" position="attributes">
-            <attribute name="class" add="custom_checkout_button" separator=" "/>
-        </xpath>
-    </template>
+        </template>
 
 </odoo>

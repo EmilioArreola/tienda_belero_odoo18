@@ -42,11 +42,14 @@
 
         </xpath>
 
-        <!-- Agregar id personalizado al botón CONTINUAR -->
-        <xpath expr="//button[@id='o_payment_submit_button']" position="attributes">
-            <attribute name="class">btn btn-primary o_payment_submit_button custom_checkout_button</attribute>
+        <xpath expr="//t[@t-call='website_sale.billing_address_row']" position="before">
+            <div class="mb-4" id="sucursal_picker_wrapper">
+                </div>
         </xpath>
 
+        <xpath expr="//a[@href='/shop/payment']" position="attributes">
+            <attribute name="class" add="custom_checkout_button" separator=" "/>
+        </xpath>
     </template>
 
 </odoo>

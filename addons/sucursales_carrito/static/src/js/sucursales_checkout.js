@@ -22,45 +22,6 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         await this._cargarEstadoInicial();
         this._interceptarBotonConfirmar();
 
-        setTimeout(() => {
-            console.log("Intentando preselección (con delay)...");
-            this._preseleccionarEnvioPorDefecto();
-            this._alCambiarMetodoEntrega();
-        }, 300);
-
-        // 3. Ya no se necesita el 'return' de super aquí al final.
-    },
-
-    _preseleccionarEnvioPorDefecto: function () {
-        const textoEnvio = "Envío (2-3 días hábiles)";
-        const $labels = this.$('label.o_delivery_carrier_label');
-        let found = false;
-
-        this.$('input[name="o_delivery_radio"]:checked').prop('checked', false);
-        console.log("Preselección de Odoo desmarcada.");
-
-        $labels.each((i, label) => {
-            const $label = $(label);
-            const labelText = $label.text().trim().toLowerCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-            if (labelText.includes(textoEnvio)) {
-                const radioId = $label.attr('for');
-                if (radioId) {
-                    const $radio = this.$('#' + radioId);
-                    if ($radio.length) {
-                        $radio.prop('checked', true);
-                        console.log(`✅ Preselección aplicada: ${textoEnvio}`);
-                        found = true;
-                        return false;
-                    }
-                }
-            }
-        });
-
-        if (!found) {
-            console.warn(`⚠️ No se pudo preseleccionar el envío "${textoEnvio}"`);
-        }
     },
 
     _cargarEstadoInicial: async function () {
@@ -78,25 +39,36 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     // ✅ Interceptor actualizado para el botón "Continuar" del checkout
     _interceptarBotonConfirmar: function () {
         const self = this;
-
-        // Botón "Continuar" en el checkout
+        // El selector del botón está perfecto
         const botonSelector = 'a[href="/shop/payment"], button[name="o_payment"]';
 
         document.addEventListener('click', function (e) {
             const target = e.target.closest(botonSelector);
             if (target) {
                 console.log("🛑 Click en botón 'Continuar' capturado");
+
+                // 1️⃣ PRIMERA VALIDACIÓN: ¿Eligió método de entrega?
+                if (!self._validarMetodoEntrega()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    console.warn("⛔ Bloqueado: No se seleccionó método de entrega");
+                    return false;
+                }
+
+                // 2️⃣ SEGUNDA VALIDACIÓN: ¿Eligió sucursal (si aplica)?
                 if (!self._validarSucursal()) {
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     console.warn("⛔ Bloqueado: No se seleccionó sucursal");
                     return false;
-                } else {
-                    console.log("✅ Validación OK — puede continuar");
                 }
+
+                // Si pasa ambas...
+                console.log("✅ Validación OK — puede continuar");
             }
-        }, true);
+        }, true); // El 'true' (capturing) es importante, déjalo.
 
         console.log("✅ Interceptor activo para botón 'Continuar' en checkout");
     },
@@ -127,6 +99,28 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         }
 
         return true;
+    },
+
+    _validarMetodoEntrega: function () {
+        const $checked = this.$('input[name="o_delivery_radio"]:checked');
+
+        if ($checked.length === 0) {
+            console.warn("⛔ Validación fallida: No hay método de entrega");
+
+            // Hacemos scroll hacia la sección de métodos de entrega
+            const $wrapper = this.$('input[name="o_delivery_radio"]').first().closest('div.card-body, .o_delivery_carrier_select');
+
+            $wrapper[0]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Mostramos una alerta
+            setTimeout(() => {
+                alert('⚠️ Por favor, seleccione un método de entrega antes de continuar.');
+            }, 100);
+
+            return false; // Bloquea
+        }
+
+        return true; // Permite
     },
 
     _alCambiarMetodoEntrega: async function () {

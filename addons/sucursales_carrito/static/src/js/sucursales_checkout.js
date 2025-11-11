@@ -2,28 +2,186 @@
 
 import publicWidget from "@web/legacy/js/public/public_widget";
 
-console.log("✅ sucursales_checkout.js v3.0 - Validación completa en checkout");
+console.log("✅ sucursales_checkout.js v5.0 (Versión Limpia)");
 
 publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
-    selector: '#wrap',
+    selector: '#wrap', // Se aplica a toda la página
+
     events: {
+        // 1. EL ÚNICO evento para el cambio de envío
         'change input[name="o_delivery_radio"]': '_alCambiarMetodoEntrega',
+        // 2. El evento para guardar la sucursal seleccionada
         'change #sucursal_select': '_alCambiarSucursal',
     },
 
+    /**
+     * @override
+     * Se ejecuta al cargar la página
+     */
     start: async function () {
-        // ⬇️ ESTA ES LA CORRECCIÓN ⬇️
-        // 1. Llama a 'super' PRIMERO y usa 'await'
+        // Llamada obligatoria a super() para widgets async
         await this._super.apply(this, arguments);
+        console.log("🚀 Widget v5.0 Iniciado");
 
-        console.log("🚀 Widget iniciado");
-
-        // 2. Ahora sí, ejecuta el resto de tu lógica async
-        await this._cargarEstadoInicial();
+        // 1. Activar el interceptor del botón "Confirmar"
         this._interceptarBotonConfirmar();
 
+        // 2. Restaurar el estado de la sucursal (si el usuario recarga la página)
+        await this._cargarEstadoInicial();
+
+        // 3. Comprobar el estado inicial al cargar la página
+        // (Esto soluciona el caso "precargado" que mencionaste)
+        this._alCambiarMetodoEntrega();
     },
 
+    //==============================================
+    // LÓGICA DE MOSTRAR / OCULTAR
+    //==============================================
+
+    /**
+     * Función PRINCIPAL. Se llama al cargar y al cambiar el envío.
+     * Revisa el envío seleccionado y decide si muestra u oculta las sucursales.
+     */
+    _alCambiarMetodoEntrega: async function () {
+        console.log("🖱️ Revisando método de entrega...");
+        const $checked = this.$('input[name="o_delivery_radio"]:checked');
+
+        if (!$checked.length) {
+            console.log("...ningún envío seleccionado. Ocultando.");
+            this._ocultarSucursales();
+            return;
+        }
+
+        const carrier_id = $checked.val();
+        console.log(`...ID de envío: ${carrier_id}`);
+
+        // Preguntamos al backend (asíncrono)
+        if (await this._esMetodoRecogida(carrier_id)) {
+            console.log("✅ Es 'Recoger'. MOSTRANDO sucursales.");
+            this._mostrarSucursales();
+        } else {
+            console.log("❌ No es 'Recoger'. OCULTANDO sucursales.");
+            this._ocultarSucursales();
+        }
+    },
+
+    /**
+     * Muestra el contenedor de sucursales
+     */
+    _mostrarSucursales: function () {
+        const $wrapper = this.$('#sucursal_picker_wrapper');
+        if (!$wrapper.length) return;
+
+        $wrapper.removeClass('d-none').addClass('d-block');
+        // Scroll suave
+        $wrapper[0]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    },
+
+    /**
+     * Oculta el contenedor de sucursales
+     */
+    _ocultarSucursales: function () {
+        const $wrapper = this.$('#sucursal_picker_wrapper');
+        $wrapper.removeClass('d-block').addClass('d-none');
+
+        // Limpia el select y los errores
+        const $select = this.$('#sucursal_select');
+        $select.val('').removeClass('is-valid is-invalid');
+        this.$('#sucursal_error_msg').removeClass('show');
+
+        // Limpiamos la sucursal guardada en el backend
+        // Esta es la única llamada RPC "extra" que necesitamos.
+        // Se "dispara y olvida" para limpiar el estado.
+        this._rpc('/shop/update_sucursal', { sucursal: "" })
+            .catch(err => console.error("Error limpiando sucursal:", err));
+    },
+
+    //==============================================
+    // LÓGICA DE VALIDACIÓN Y GUARDADO
+    //==============================================
+
+    /**
+     * Intercepta el clic en el botón "Confirmar"
+     */
+    _interceptarBotonConfirmar: function () {
+        const self = this;
+        const botonSelector = 'a[href="/shop/payment"], button[name="o_payment"]';
+
+        // Usamos 'document' para capturar el clic
+        document.addEventListener('click', function (e) {
+            const target = e.target.closest(botonSelector);
+            if (target) {
+                console.log("🛑 Clic en 'Confirmar' capturado");
+
+                // VALIDACIÓN 1: ¿Eligió método de entrega?
+                if (!self._validarMetodoEntrega()) {
+                    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+                    console.warn("⛔ BLOQUEADO: No hay método de entrega");
+                    return false;
+                }
+
+                // VALIDACIÓN 2: ¿Eligió sucursal (si aplica)?
+                if (!self._validarSucursal()) {
+                    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+                    console.warn("⛔ BLOQUEADO: No se seleccionó sucursal");
+                    return false;
+                }
+
+                console.log("✅ Validación OK — puede continuar");
+            }
+        }, true); // Usar 'true' (capturing) es importante
+
+        console.log("✅ Interceptor de botón 'Confirmar' ACTIVO");
+    },
+
+    /**
+     * VALIDADOR 1: Revisa si se seleccionó un método de entrega
+     */
+    _validarMetodoEntrega: function () {
+        if (this.$('input[name="o_delivery_radio"]:checked').length === 0) {
+            alert('⚠️ Por favor, seleccione un método de entrega antes de continuar.');
+            // Hacemos scroll a la sección
+            this.$('input[name="o_delivery_radio"]').first().closest('div.card-body, .o_delivery_carrier_select')[0]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
+        return true;
+    },
+
+    /**
+     * VALIDADOR 2: Revisa si se seleccionó una sucursal (SI ES REQUERIDO)
+     */
+    _validarSucursal: function () {
+        const $wrapper = this.$('#sucursal_picker_wrapper');
+
+        // Si el selector no está visible, no se requiere validación
+        if (!$wrapper.length || $wrapper.hasClass('d-none')) {
+            return true;
+        }
+
+        const $select = this.$('#sucursal_select');
+        const valor = $select.val();
+
+        // Si está visible Y el valor está vacío, es un error
+        if (!valor || valor === '' || valor === null) {
+            console.warn("⛔ Validación fallida: No hay sucursal seleccionada");
+            $select.addClass('is-invalid').removeClass('is-valid');
+            this.$('#sucursal_error_msg').removeClass('d-none').addClass('show');
+
+            alert('⚠️ Por favor, seleccione una sucursal antes de continuar.');
+            $wrapper[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
+
+        return true; // Validación OK
+    },
+
+    //==============================================
+    // FUNCIONES HELPER (RPC)
+    //==============================================
+
+    /**
+     * HELPER 1: Carga la sucursal guardada en la sesión al iniciar
+     */
     _cargarEstadoInicial: async function () {
         try {
             const data = await this._rpc('/shop/get_sucursal', {});
@@ -32,242 +190,53 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
                 console.log(`📥 Sucursal restaurada: ${data.sucursal}`);
             }
         } catch (error) {
-            console.error("❌ Error inicial:", error);
+            console.error("❌ Error cargando estado inicial:", error);
         }
     },
 
-    // ✅ Interceptor actualizado para el botón "Continuar" del checkout
-    _interceptarBotonConfirmar: function () {
-        const self = this;
-        // El selector del botón está perfecto
-        const botonSelector = 'a[href="/shop/payment"], button[name="o_payment"]';
-
-        document.addEventListener('click', function (e) {
-            const target = e.target.closest(botonSelector);
-            if (target) {
-                console.log("🛑 Click en botón 'Continuar' capturado");
-
-                // 1️⃣ PRIMERA VALIDACIÓN: ¿Eligió método de entrega?
-                if (!self._validarMetodoEntrega()) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    console.warn("⛔ Bloqueado: No se seleccionó método de entrega");
-                    return false;
-                }
-
-                // 2️⃣ SEGUNDA VALIDACIÓN: ¿Eligió sucursal (si aplica)?
-                if (!self._validarSucursal()) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    console.warn("⛔ Bloqueado: No se seleccionó sucursal");
-                    return false;
-                }
-
-                // Si pasa ambas...
-                console.log("✅ Validación OK — puede continuar");
-            }
-        }, true); // El 'true' (capturing) es importante, déjalo.
-
-        console.log("✅ Interceptor activo para botón 'Continuar' en checkout");
-    },
-
-    _validarSucursal: function () {
-        const $wrapper = this.$('#sucursal_picker_wrapper');
-
-        if (!$wrapper.length || $wrapper.hasClass('d-none')) {
-            return true; // No se requiere validación
-        }
-
-        const $select = this.$('#sucursal_select');
-        const valor = $select.val();
-
-        if (!valor || valor === '' || valor === null) {
-            console.warn("⛔ Validación fallida: No hay sucursal seleccionada");
-
-            $select.addClass('is-invalid').removeClass('is-valid');
-            this.$('#sucursal_error_msg').removeClass('d-none').addClass('show');
-
-            $wrapper[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-            setTimeout(() => {
-                alert('⚠️ Por favor, seleccione una sucursal antes de continuar.');
-            }, 100);
-
-            return false;
-        }
-
-        return true;
-    },
-
-    _validarMetodoEntrega: function () {
-        const $checked = this.$('input[name="o_delivery_radio"]:checked');
-
-        if ($checked.length === 0) {
-            console.warn("⛔ Validación fallida: No hay método de entrega");
-
-            // Hacemos scroll hacia la sección de métodos de entrega
-            const $wrapper = this.$('input[name="o_delivery_radio"]').first().closest('div.card-body, .o_delivery_carrier_select');
-
-            $wrapper[0]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-            // Mostramos una alerta
-            setTimeout(() => {
-                alert('⚠️ Por favor, seleccione un método de entrega antes de continuar.');
-            }, 100);
-
-            return false; // Bloquea
-        }
-
-        return true; // Permite
-    },
-
-    _alCambiarMetodoEntrega: async function () {
-        const $checked = this.$('input[name="o_delivery_radio"]:checked');
-        if (!$checked.length) {
-            this._ocultarSucursales();
-            return;
-        }
-
-        const idRadio = $checked.attr('id');
-        const $label = this.$('label[for="' + idRadio + '"]');
-
-        // 🔹 OBTENEMOS EL ID DEL MÉTODO DE ENVÍO
-        // El valor del input radio es el ID del delivery.carrier
-        const carrier_id = $checked.val();
-
-        console.log(`📝 Método: "${$label.text().trim()}" | ID: ${carrier_id}`);
-
-        // 🔹 PREGUNTAMOS AL SERVIDOR SI ES RECOGIDA
-        if (await this._esMetodoRecogida(carrier_id)) {
-            console.log("✅ Es recoger en tienda");
-            this._mostrarSucursales();
-        } else {
-            console.log("❌ No es recoger en tienda");
-            this._ocultarSucursales();
-        }
-    },
-
-    _esMetodoRecogida: async function (carrier_id) {
-        if (!carrier_id) {
-            return false;
-        }
-
-        try {
-            // 🔹 Llamamos a la nueva ruta del controlador
-            const data = await this._rpc('/shop/es_recogida', {
-                carrier_id: carrier_id
-            });
-
-            // Devolvemos la respuesta del servidor (true o false)
-            return data.es_recogida;
-
-        } catch (error) {
-            console.error("❌ Error RPC al verificar método de recogida:", error);
-            return false; // Asumimos falso si hay un error
-        }
-    },
-
+    /**
+     * HELPER 2: Guarda la sucursal seleccionada en la sesión
+     */
     _alCambiarSucursal: async function () {
         const $select = this.$('#sucursal_select');
         const valor = $select.val();
         console.log(`🏦 Sucursal cambiada a: "${valor}"`);
 
+        // Quitar errores
         $select.removeClass('is-invalid is-valid');
         this.$('#sucursal_error_msg').addClass('d-none').removeClass('show');
 
-        $select.prop('disabled', true);
+        $select.prop('disabled', true); // Bloquear mientras guarda
         try {
             const data = await this._rpc('/shop/update_sucursal', { sucursal: valor });
             if (data.status === 'success') {
-                console.log(`✅ Guardado en backend`);
+                console.log(`✅ Sucursal guardada en backend`);
                 if (valor && valor !== '') {
-                    $select.addClass('is-valid');
+                    $select.addClass('is-valid'); // Feedback visual
                 }
             }
         } catch (error) {
-            console.error("❌ Error RPC:", error);
+            console.error("❌ Error RPC en _alCambiarSucursal:", error);
+            $select.addClass('is-invalid');
         } finally {
-            $select.prop('disabled', false);
-            this._actualizarEstadoBotonConfirmar();
+            $select.prop('disabled', false); // Desbloquear
         }
     },
 
-    _limpiarSucursalEnBackend: function () {
-        console.log("🧹 Limpiando sucursal en backend...");
-
-        // Esta función llama al backend para poner la sucursal en 'False'
-        // pero NO es 'async' a propósito, para evitar "race conditions".
-        // Simplemente "dispara y olvida".
-        this._rpc('/shop/update_sucursal', { sucursal: "" })
-            .then(data => {
-                if (data.status === 'success') {
-                    console.log(`✅ Sucursal limpiada en backend`);
-                }
-            })
-            .catch(error => {
-                console.error("❌ Error RPC al limpiar sucursal:", error);
-            });
-    },
-
-    _actualizarEstadoBotonConfirmar: function () {
-        // 🔹 Cambiado para buscar el botón "Continuar" del checkout
-        const $boton = this.$('a[href="/shop/payment"], button[name="o_payment"]');
-        const $wrapper = this.$('#sucursal_picker_wrapper');
-        const $select = this.$('#sucursal_select');
-        const $errorMsg = this.$('#sucursal_error_msg');
-
-        if (!$wrapper.length || $wrapper.hasClass('d-none')) {
-            $boton.removeAttr('disabled');
-            $errorMsg.addClass('d-none');
-            return;
-        }
-
-        const valor = $select.val();
-        if (!valor || valor === '') {
-            $boton.attr('disabled', true);
-            $errorMsg.removeClass('d-none');
-        } else {
-            $boton.removeAttr('disabled');
-            $errorMsg.addClass('d-none');
+    /**
+     * HELPER 3: Pregunta al backend si un ID es de recogida
+     */
+    _esMetodoRecogida: async function (carrier_id) {
+        if (!carrier_id) return false;
+        try {
+            const data = await this._rpc('/shop/es_recogida', { carrier_id: carrier_id });
+            return data.es_recogida;
+        } catch (error) {
+            console.error("❌ Error RPC en _esMetodoRecogida:", error);
+            return false;
         }
     },
 
-    _mostrarSucursales: function () {
-        const $wrapper = this.$('#sucursal_picker_wrapper');
-        if (!$wrapper.length) return;
-
-        $wrapper.removeClass('d-none').addClass('d-block');
-        this._actualizarEstadoBotonConfirmar();
-
-        const $select = this.$('#sucursal_select');
-        const valorActual = $select.val();
-        if (valorActual && valorActual !== '') {
-            this._alCambiarSucursal();
-        }
-
-        setTimeout(() => {
-            $wrapper[0]?.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest'
-            });
-        }, 150);
-    },
-
-    _ocultarSucursales: function () {
-        const $wrapper = this.$('#sucursal_picker_wrapper');
-        $wrapper.removeClass('d-block').addClass('d-none');
-
-        const $select = this.$('#sucursal_select');
-        $select.val('').removeClass('is-valid is-invalid');
-        this.$('#sucursal_error_msg').removeClass('show');
-
-        // ✅ REEMPLAZAMOS LA LÍNEA MALA POR LA NUEVA FUNCIÓN:
-        this._limpiarSucursalEnBackend();
-
-        this._actualizarEstadoBotonConfirmar();
-    },
 });
 
 export default publicWidget.registry.SelectorSucursales;

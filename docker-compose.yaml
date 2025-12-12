@@ -1,39 +1,25 @@
 version: "3"
 services:
-  #nginx:
-  #image: nginx:latest
-  # container_name: nginx-proxy
-  #ports:
-  #  - "8001:80"
-  #volumes:
-  #  - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-  #  - nginx_logs:/var/log/nginx
-  #depends_on:
-  #   - web
-  #networks:
-  #  - odoo-network
-
   web:
     container_name: ${WEB_HOST}
     image: ${WEB_IMAGE_NAME}
     depends_on:
       - db
-    # ==========================================================
-    # CORREGIDO: Volvemos a 'expose'
-    # ==========================================================
-    expose:
-      - "8069"
-      - "8072"
+    ports:
+      # Acceso Web: localhost:8001
+      - "${WEB_PORT}:8069"
+      # Acceso Chat: localhost:8004
+      - "${WEBSOCKET_PORT}:8072"
     volumes:
       - odoo-web-data:/var/lib/odoo
       - ./config:/etc/odoo
       - ./addons:/mnt/extra-addons
-    # ==========================================================
-    # CORREGIDO: Esta es la ruta correcta del entrypoint
-    # ==========================================================
+      - ./smartodoo-addons:/mnt/extra-addons2
+    environment:
+      - HOST=${DB_HOST}
+      - USER=${DB_USER}
+      - PASSWORD=${DB_PASSWORD}
     entrypoint: "/usr/bin/odoo -c /etc/odoo/odoo.conf"
-    networks:
-      - odoo-network
 
   db:
     container_name: ${DB_HOST}
@@ -44,17 +30,11 @@ services:
       - POSTGRES_USER=${DB_USER}
       - PGDATA=/var/lib/postgresql/data/pgdata
     ports:
+      # Acceso DB: localhost:5432
       - "${DB_PORT}:5432"
     volumes:
       - odoo-db-data:/var/lib/postgresql/data/pgdata
-    networks:
-      - odoo-network
 
 volumes:
   odoo-db-data:
   odoo-web-data:
-  nginx_logs:
-
-networks:
-  odoo-network:
-    driver: bridge

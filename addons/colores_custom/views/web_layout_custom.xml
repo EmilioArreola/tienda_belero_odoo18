@@ -4,7 +4,7 @@
     <data>
         <template id="custom_backend_favicon" inherit_id="web.layout" name="Custom Backend Favicon">
             <xpath expr="//link[@rel='shortcut icon']" position="replace">
-                <link rel="shortcut icon" href="/tema_nuevo_v1/static/src/img/favicon.ico" type="image/x-icon"/>
+                <link rel="shortcut icon" href="colores_custom/static/src/img/favicon.ico" type="image/x-icon"/>
             </xpath>
         </template>
     </data>

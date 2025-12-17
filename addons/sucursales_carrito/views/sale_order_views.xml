@@ -1,54 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Vista de formulario: Agregar campo sucursal_recogida -->
-    <record id="view_order_form_sucursal" model="ir.ui.view">
-        <field name="name">sale.order.form.sucursal</field>
+    <record id="view_order_form_inherit_sucursal_carrito" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.sucursal.carrito</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
-            <!-- Insertamos después del campo de dirección de envío -->
-            <xpath expr="//field[@name='partner_shipping_id']" position="after">
-                <field name="sucursal_recogida"
-                       widget="selection"
-                       options="{'no_create': True, 'no_open': True}"
-                       invisible="carrier_id == False"
-                       readonly="state in ['sale', 'done', 'cancel']"/>
-            </xpath>
-        </field>
-    </record>
-
-    <!-- Vista de árbol: Mostrar la sucursal en la lista de órdenes -->
-    <record id="view_order_tree_sucursal" model="ir.ui.view">
-        <field name="name">sale.order.tree.sucursal</field>
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale.view_quotation_tree"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='user_id']" position="after">
-                <field name="sucursal_recogida" optional="hide"/>
-            </xpath>
-        </field>
-    </record>
-
-    <!-- Vista de búsqueda: Agregar filtro por sucursal -->
-    <record id="view_sales_order_filter_sucursal" model="ir.ui.view">
-        <field name="name">sale.order.search.sucursal</field>
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
-        <field name="arch" type="xml">
-            <!-- Agregar filtro después de "Mis órdenes" -->
-            <xpath expr="//filter[@name='my_sale_orders_filter']" position="after">
-                <separator/>
-                <filter string="Con Sucursal de Recogida" 
-                        name="con_sucursal" 
-                        domain="[('sucursal_recogida', '!=', False)]"/>
-            </xpath>
             
-            <!-- Agregar agrupación - Busca cualquier elemento <group> dentro de <search> -->
-            <xpath expr="//search/group" position="inside">
-                <filter string="Sucursal de Recogida" 
-                        name="group_by_sucursal" 
-                        context="{'group_by': 'sucursal_recogida'}"/>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="sucursal_recogida" 
+                       readonly="state in ['sale', 'done', 'cancel']"
+                       invisible="not sucursal_recogida"
+                       decoration-bf="1"
+                       decoration-info="1"/>
             </xpath>
+
+            <xpath expr="//group[@name='sale_shipping']" position="inside">
+                 <field name="sucursal_recogida" readonly="state in ['sale', 'done', 'cancel']"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_quotation_tree_inherit_sucursal" model="ir.ui.view">
+        <field name="name">sale.order.tree.inherit.sucursal</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="sucursal_recogida" optional="show" decoration-bf="1"/>
+            </field>
         </field>
     </record>
 </odoo>

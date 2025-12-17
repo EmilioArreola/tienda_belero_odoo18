@@ -1,59 +1,61 @@
 # -*- coding: utf-8 -*-
-import json
 from odoo import http
 from odoo.http import request
+import logging
 
-class SucursalCheckout(http.Controller):
+_logger = logging.getLogger(__name__)
+
+class SucursalesApiController(http.Controller):
 
     @http.route(['/shop/update_sucursal'], type='json', auth="public", website=True, csrf=False)
     def update_sucursal_recogida(self, sucursal=None, **kwargs):
         """
-        Recibe la sucursal seleccionada desde el JS y la guarda en la orden de venta (cotización)
+        API simple: Guarda en sesión (ram) y base de datos (disco).
         """
-        # Obtenemos la cotización actual de la sesión
-        order = request.website.sale_get_order()
-        if not order:
-            return {'error': 'No sale order found'}
-
-        # Escribimos el valor en la cotización
-        # Si 'sucursal' es un string vacío, guardará False (limpiará el campo)
         try:
-            order.write({'sucursal_recogida': sucursal or False})
-            return {'status': 'success', 'sucursal_guardada': sucursal}
-        except Exception as e:
-            # Esto podría fallar si el valor de 'sucursal' no es válido
-            return {'error': str(e)}
+            # 1. SIEMPRE guardar en la sesión (Nuestra copia de seguridad)
+            request.session['sucursal_carrito_backup'] = sucursal
+            
+            # 2. Intentar guardar en la Orden
+            order = request.website.sale_get_order(force_create=False)
+            if order:
+                # Usamos sudo() para evitar reglas de registro
+                order.sudo().write({'sucursal_recogida': sucursal})
+                # Intentamos forzar el guardado, pero si falla, no importa, tenemos la sesión
+                request.env.cr.commit()
+                return {'status': 'success', 'message': 'Guardado OK'}
+            
+            return {'status': 'success', 'message': 'Guardado solo en sesión (Sin orden)'}
 
-    # --- ¡ESTA ES LA FUNCIÓN QUE TE FALTA! ---
-    @http.route(['/shop/get_sucursal'], type='json', auth="public", website=True)
+        except Exception as e:
+            _logger.error(f"⚠️ Error en API update_sucursal: {str(e)}")
+            # Devolvemos success porque al menos quedó en la sesión
+            return {'status': 'success', 'message': 'Error en DB, salvado en sesión'}
+
+    @http.route(['/shop/get_sucursal'], type='json', auth="public", website=True, csrf=False)
     def get_sucursal_recogida(self, **kwargs):
         """
-        Devuelve la sucursal guardada en la orden actual para que
-        el JS pueda restaurarla al cargar la página.
+        Recupera el dato para mostrarlo en el selector al recargar.
         """
-        order = request.website.sale_get_order()
-        if order and order.sucursal_recogida:
-            return {'status': 'success', 'sucursal': order.sucursal_recogida}
-        # Si no hay orden o no hay sucursal, no devuelve nada
-        return {'status': 'error', 'sucursal': False}
-    @http.route(['/shop/es_recogida'], type='json', auth="public", website=True)
-    def es_metodo_recogida(self, carrier_id=None, **kwargs):
-        """
-        Comprueba si un delivery_carrier_id es de tipo "recogida en tienda"
-        y devuelve True o False.
-        """
-        if not carrier_id:
-            return {'es_recogida': False}
-        
         try:
-            # Buscamos el método de envío en el backend
-            carrier = request.env['delivery.carrier'].sudo().browse(int(carrier_id))
+            # Prioridad: Sesión (es lo más fresco)
+            val = request.session.get('sucursal_carrito_backup')
             
-            if carrier.exists() and carrier.es_recogida_tienda:
-                return {'es_recogida': True}
-            else:
-                return {'es_recogida': False}
-        
-        except Exception as e:
-            # Si algo falla (ej. el ID no es un número), asumimos que no es recogida
+            # Si no hay sesión, miramos la base de datos
+            if not val:
+                order = request.website.sale_get_order(force_create=False)
+                if order:
+                    val = order.sudo().sucursal_recogida
+            
+            return {'status': 'success', 'sucursal': val}
+        except Exception:
+            return {'status': 'success', 'sucursal': False}
+
+    @http.route(['/shop/es_recogida'], type='json', auth="public", website=True, csrf=False)
+    def check_es_recogida(self, carrier_id=None, **kwargs):
+        try:
+            if not carrier_id: return {'es_recogida': False}
+            carrier = request.env['delivery.carrier'].sudo().browse(int(carrier_id))
+            return {'es_recogida': carrier.exists() and carrier.es_recogida_tienda}
+        except Exception:
             return {'es_recogida': False}

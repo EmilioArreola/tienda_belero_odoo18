@@ -1,66 +1,322 @@
-/* 🔴 Mensaje de error */
+/* ============================================
+   SUCURSALES CHECKOUT - ESTILOS CONSOLIDADOS
+   ============================================ */
+
+/* 🔴 MENSAJE DE ERROR */
 #sucursal_error_msg {
     color: #dc3545;
     font-size: 0.875rem;
     margin-top: 0.5rem;
+    transition: all 0.3s ease;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
 }
 
 #sucursal_error_msg.d-none {
     display: none !important;
+    max-height: 0;
+    opacity: 0;
 }
 
 #sucursal_error_msg.show {
     display: block !important;
+    max-height: 200px;
+    opacity: 1;
+    animation: slideDown 0.3s ease-out;
 }
 
-/* 🟠 Botón "Seleccionar sucursal" */
+/* Animación de deslizamiento para el mensaje de error */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 🟠 BOTÓN "SELECCIONAR SUCURSAL" */
 #select_branch_button {
     background-color: #d35400;
     color: white;
     border-radius: 8px;
     padding: 10px 15px;
+    transition: background-color 0.3s ease;
 }
 
-/* 🔵 Selector de sucursal */
+#select_branch_button:hover {
+    background-color: #e67e22;
+}
+
+/* 🔵 SELECTOR DE SUCURSAL */
 .branch-selector select,
 #sucursal_select {
     border: 1px solid #ccc;
     border-radius: 6px;
     padding: 5px;
     transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 1rem;
 }
 
+/* Estado focus normal */
 #sucursal_select:focus {
     border-color: #0d6efd;
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    outline: none;
 }
 
+/* Estado hover (cuando no es inválido) */
+#sucursal_select:hover:not(.is-invalid) {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+/* Estado INVÁLIDO */
 #sucursal_select.is-invalid {
     border-color: #dc3545 !important;
+    border-width: 2px !important;
+    background-color: #fff5f5 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    animation: shake 0.5s;
 }
 
+#sucursal_select.is-invalid:focus {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+}
+
+/* Estado VÁLIDO */
 #sucursal_select.is-valid {
     border-color: #198754 !important;
+    border-width: 2px;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.15);
 }
 
-/* 🟢 Botón "Continuar" */
-.custom_checkout_button {
+/* Primera opción (placeholder) en color gris */
+#sucursal_select option:first-child {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Opciones normales en negro */
+#sucursal_select option:not(:first-child) {
+    color: #212529;
+    font-style: normal;
+}
+
+/* Animación de shake cuando hay error */
+@keyframes shake {
+    0%, 100% { 
+        transform: translateX(0); 
+    }
+    10%, 30%, 50%, 70%, 90% { 
+        transform: translateX(-5px); 
+    }
+    20%, 40%, 60%, 80% { 
+        transform: translateX(5px); 
+    }
+}
+
+/* 📦 CONTENEDOR DE SUCURSALES */
+#sucursal_picker_wrapper {
+    transition: all 0.3s ease;
+    border-left: 4px solid #0d6efd;
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+#sucursal_picker_wrapper.d-none {
+    display: none !important;
+}
+
+#sucursal_picker_wrapper.show {
+    display: block !important;
+}
+
+/* Título del selector de sucursales */
+#sucursal_picker_wrapper h4 {
+    color: #0d6efd;
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+}
+
+/* Alert de información */
+#sucursal_picker_wrapper .alert-info {
+    background-color: #e7f3ff;
+    border-color: #b8daff;
+    color: #004085;
+}
+
+/* Alert de error */
+#sucursal_picker_wrapper .alert-danger {
+    background-color: #fff5f5;
+    border-color: #f5c2c7;
+    color: #842029;
+    font-weight: 500;
+}
+
+/* 🟢 BOTÓN "CONTINUAR" (CHECKOUT) */
+.custom_checkout_button,
+.a-submit,
+button[name="website_sale_main_button"] {
     background-color: #d35400 !important;
-    /* naranja */
     border: none !important;
     color: #fff !important;
     border-radius: 8px;
     padding: 10px 18px;
     font-weight: 500;
-    transition: 0.3s ease;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
 
-.custom_checkout_button:hover {
+.custom_checkout_button:hover,
+.a-submit:hover,
+button[name="website_sale_main_button"]:hover {
     background-color: #e67e22 !important;
-    /* más claro al pasar el cursor */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(211, 84, 0, 0.3);
 }
 
-.custom_checkout_button[disabled] {
+/* Estado deshabilitado del botón */
+.custom_checkout_button[disabled],
+.a-submit[disabled],
+button[name="website_sale_main_button"][disabled] {
     opacity: 0.6;
     cursor: not-allowed;
+    background-color: #95a5a6 !important;
+}
+
+.custom_checkout_button[disabled]:hover,
+.a-submit[disabled]:hover,
+button[name="website_sale_main_button"][disabled]:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Asegurar que el botón se habilite cuando hay sucursal válida */
+#sucursal_select:valid ~ .oe_website_sale button[type="submit"],
+#sucursal_select:valid ~ * button[name="website_sale_main_button"],
+#sucursal_select:not([value=""]):not([value=" "]) ~ * .a-submit {
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
+}
+
+/* 🎨 ESTILOS ADICIONALES PARA UX MEJORADA */
+
+/* Efecto de pulso en el mensaje de error */
+#sucursal_error_msg.show {
+    animation: slideDown 0.3s ease-out, pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.85;
+    }
+}
+
+/* Icono dentro del select cuando está en error */
+#sucursal_select.is-invalid {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    padding-right: calc(1.5em + 0.75rem);
+}
+
+/* Icono dentro del select cuando está válido */
+#sucursal_select.is-valid {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    padding-right: calc(1.5em + 0.75rem);
+}
+
+/* 📱 RESPONSIVE - MOBILE */
+@media (max-width: 768px) {
+    #sucursal_picker_wrapper {
+        padding: 1rem;
+        border-left-width: 3px;
+    }
+    
+    #sucursal_picker_wrapper h4 {
+        font-size: 0.75rem;
+    }
+    
+    #sucursal_select {
+        font-size: 0.875rem;
+        padding: 0.5rem;
+    }
+    
+    .custom_checkout_button,
+    .a-submit,
+    button[name="website_sale_main_button"] {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+        width: 100%;
+    }
+}
+
+/* 🔧 FIXES ESPECÍFICOS DE ODOO */
+
+/* Asegurar z-index correcto para los selectores */
+#sucursal_picker_wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+/* Prevenir que otros estilos de Odoo interfieran */
+#sucursal_select.form-select {
+    background-position: right 0.75rem center, right 2.25rem center !important;
+}
+
+/* Asegurar que el select sea completamente funcional */
+#sucursal_select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Flecha personalizada del select */
+#sucursal_select:not(.is-invalid):not(.is-valid) {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    padding-right: 2.5rem;
+}
+
+/* 🎯 ACCESIBILIDAD */
+
+/* Focus visible para navegación con teclado */
+#sucursal_select:focus-visible {
+    outline: 2px solid #0d6efd;
+    outline-offset: 2px;
+}
+
+/* Mejor contraste para el texto del error */
+#sucursal_error_msg strong {
+    font-weight: 700;
+    color: #721c24;
+}
+
+/* Loading state (opcional) */
+#sucursal_select.loading {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3e%3cpath fill='%23666' d='M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z'%3e%3canimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='1s' repeatCount='indefinite'/%3e%3c/path%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 20px 20px;
 }

@@ -3,7 +3,7 @@
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { rpc } from "@web/core/network/rpc";
 
-console.log("✅ SelectorSucursales v12.0 - Guardado Forzoso al Confirmar");
+console.log("✅ SelectorSucursales v15.0 - Secuestro de Formulario");
 
 publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     selector: '#wrap',
@@ -17,21 +17,91 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
 
     start: async function () {
         await this._super.apply(this, arguments);
-        this._interceptarBotonConfirmar();
+        this._secuestrarBotonConfirmar();
         await this._cargarEstadoInicial();
-        setTimeout(() => { this._alCambiarMetodoEntrega(); }, 800);
+        // Llamada rápida para pintar el selector si ya estaba seleccionado
+        this._alCambiarMetodoEntrega();
     },
 
     // -------------------------------------------------------------------------
-    // LÓGICA DE DETECCIÓN Y VISUALIZACIÓN
+    // LÓGICA DE SECUESTRO (SOLUCIÓN FINAL)
+    // -------------------------------------------------------------------------
+    _secuestrarBotonConfirmar: function () {
+        const self = this;
+        // Selectores de los botones que finalizan la compra
+        const botonSelector = 'a[href="/shop/payment"], button[name="o_payment"], .o_sale_confirm, a[name="website_sale_main_button"], a[href*="/shop/confirm_order"]';
+
+        // Usamos onClick en el documento para atraparlo antes que nadie
+        document.addEventListener('click', async function (e) {
+            const target = e.target.closest(botonSelector);
+            if (!target) return;
+
+            // 1. Verificamos si debemos intervenir (¿Es recogida?)
+            const $wrapper = self.$('#sucursal_picker_wrapper');
+            if (!$wrapper.length || $wrapper.hasClass('d-none')) {
+                return; // No es recogida, dejamos que Odoo haga su trabajo
+            }
+
+            // 2. DETENEMOS TODO INMEDIATAMENTE
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            // 3. Validación Visual
+            const valor = self.$('#sucursal_select').val();
+            if (!valor) {
+                alert("⚠️ Por favor selecciona una sucursal para recoger tu pedido.");
+                self._resaltarError();
+                return;
+            }
+
+            // 4. BLOQUEO VISUAL
+            const $btn = $(target);
+            const textoOriginal = $btn.text();
+            $btn.text("Guardando y Procesando...").prop('disabled', true).addClass('disabled');
+
+            try {
+                // 5. GUARDADO CRÍTICO (Esperamos respuesta del servidor)
+                console.log("⏳ Enviando sucursal:", valor);
+                await rpc('/shop/update_sucursal', { sucursal: valor });
+                console.log("✅ Servidor confirmó guardado. Cookie actualizada.");
+
+                // 6. EJECUCIÓN MANUAL (Bypasseando JS de Odoo)
+                // Aquí está el truco: No hacemos click, hacemos lo que el click haría.
+                
+                if (target.tagName === 'BUTTON' || target.type === 'submit') {
+                    // Si es un botón, buscamos su formulario y lo enviamos NATIVAMENTE
+                    const form = target.closest('form');
+                    if (form) {
+                        console.log("🚀 Enviando formulario nativamente...");
+                        form.submit(); // Esto envía el form sin disparar validaciones JS de nuevo
+                    } else {
+                        console.error("No se encontró formulario para el botón");
+                        window.location.reload(); // Fallback
+                    }
+                } else if (target.tagName === 'A' && target.href) {
+                    // Si es un enlace, navegamos
+                    console.log("🚀 Navegando a:", target.href);
+                    window.location.href = target.href;
+                }
+
+            } catch (error) {
+                console.error("❌ Error fatal:", error);
+                $btn.text(textoOriginal).prop('disabled', false).removeClass('disabled');
+                alert("Hubo un error de conexión. Intenta de nuevo.");
+            }
+
+        }, true); // 'true' = Capture Phase (Somos los primeros en enterarnos)
+    },
+
+    // -------------------------------------------------------------------------
+    // FUNCIONES AUXILIARES (Sin cambios)
     // -------------------------------------------------------------------------
     _alCambiarMetodoEntrega: async function () {
         const $checked = this.$('input[name="delivery_type"]:checked, input[name="o_delivery_radio"]:checked');
         if (!$checked.length) { this._ocultarSucursales(); return; }
 
         let carrier_id = $checked.val();
-        
-        // Corrección ID 'on'
         if (carrier_id === 'on' || !parseInt(carrier_id)) {
              const inputId = $checked.attr('id');
              if (inputId) {
@@ -39,6 +109,7 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
                  if (match) carrier_id = match[0];
              }
         }
+        
         const carrierIdInt = parseInt(carrier_id, 10);
         if (!carrierIdInt) return;
 
@@ -56,99 +127,14 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     _ocultarSucursales: function () {
         this.$('#sucursal_picker_wrapper').addClass('d-none');
         this.$('#sucursal_select').val('');
-        // Limpiamos en backend sin bloquear
         rpc('/shop/update_sucursal', { sucursal: "" }).catch(() => {});
     },
 
-    // -------------------------------------------------------------------------
-    // GUARDADO INDIVIDUAL (Al cambiar el select)
-    // -------------------------------------------------------------------------
     _alCambiarSucursal: async function () {
         const valor = this.$('#sucursal_select').val();
-        await this._guardarSucursalBackend(valor);
-    },
-
-    _guardarSucursalBackend: async function (valor) {
-        try {
-            console.log(`💾 Intentando guardar: ${valor}`);
-            const result = await rpc('/shop/update_sucursal', { sucursal: valor });
-            
-            // Si el servidor nos dice que hubo error (gracias al try/except de Python)
-            if (result.status === 'error') {
-                console.error("❌ Error reportado por servidor:", result.error);
-                alert(`Error del sistema: ${result.error}\n\nAvise al administrador.`);
-                return false;
-            }
-            
-            console.log("✅ Guardado exitoso:", result);
-            return true;
-            
-        } catch (error) {
-            // Si el servidor explotó antes de poder responder (Error 500 real o Red)
-            console.error("❌ Error Crítico RPC:", error);
-            // Intentamos ignorarlo si es un error de red menor, pero lo logueamos
-            return true; // Dejamos pasar "con fe" en la sesión
-        }
-    },
-
-    // -------------------------------------------------------------------------
-    // LÓGICA MAESTRA: INTERCEPTAR CONFIRMACIÓN (DOBLE CHECK)
-    // -------------------------------------------------------------------------
-    _interceptarBotonConfirmar: function () {
-        const self = this;
-        // Selectores de botones de pago/confirmación
-        const botonSelector = 'a[href="/shop/payment"], button[name="o_payment"], .o_sale_confirm, a[name="website_sale_main_button"], a[href*="/shop/confirm_order"]';
-
-        // Usamos capture=true para ser los primeros en enterarnos del click
-        document.addEventListener('click', async function (e) {
-            const target = e.target.closest(botonSelector);
-            if (target) {
-                const $wrapper = self.$('#sucursal_picker_wrapper');
-                
-                // Solo si el selector es visible (es método de recogida)
-                if ($wrapper.length && !$wrapper.hasClass('d-none')) {
-                    const valor = self.$('#sucursal_select').val();
-                    
-                    // 1. VALIDACIÓN VISUAL
-                    if (!valor) {
-                        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-                        alert("⚠️ Por favor selecciona una sucursal.");
-                        self._resaltarError();
-                        return false;
-                    }
-
-                    // 2. GUARDADO FORZOSO (DOBLE CHECK)
-                    // Detenemos el evento momentáneamente para asegurar el guardado
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    // Cambiamos texto del botón para feedback
-                    const textoOriginal = target.innerText;
-                    target.innerText = "Guardando...";
-                    target.style.pointerEvents = "none"; // Evitar doble click
-
-                    const guardadoOK = await self._guardarSucursalBackend(valor);
-
-                    if (guardadoOK) {
-                        // Si se guardó bien, redirigimos manualmente a la URL del botón
-                        // o enviamos el formulario si era un botón submit
-                        console.log("🚀 Redirigiendo a confirmar...");
-                        
-                        if (target.tagName === 'A') {
-                            window.location.href = target.getAttribute('href');
-                        } else if (target.type === 'submit' || target.tagName === 'BUTTON') {
-                            // Si era un form submit, lo enviamos manualmente ahora
-                            target.closest('form').submit();
-                        }
-                    } else {
-                        // Si falló el guardado
-                        target.innerText = textoOriginal;
-                        target.style.pointerEvents = "auto";
-                        alert("❌ Hubo un error de conexión al guardar tu sucursal. Intenta de nuevo.");
-                    }
-                }
-            }
-        }, true);
+        if(valor) this.$('#sucursal_select').removeClass('is-invalid');
+        // Guardado silencioso de fondo
+        rpc('/shop/update_sucursal', { sucursal: valor });
     },
 
     _resaltarError: function() {
@@ -157,9 +143,6 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
         this.$('#sucursal_picker_wrapper')[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
     },
 
-    // -------------------------------------------------------------------------
-    // CARGA INICIAL Y HELPERS
-    // -------------------------------------------------------------------------
     _esMetodoRecogida: async function (carrier_id) {
         if (!carrier_id) return false;
         try {

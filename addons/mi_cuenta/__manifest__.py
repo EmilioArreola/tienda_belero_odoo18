@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Personalización de Portal",  # Puedes poner el nombre que quieras
+    'name': "Personalización de información del cliente en Mi cuenta",  # Puedes poner el nombre que quieras
 
     'summary': """
-        Oculta el campo de 'Formato electrónico' en el perfil del cliente.
-    """,
+        Modifica los datos que le pide al cliente en su portal de usuario Mi cuenta.""",
 
     'description': """
-        Este módulo hereda la vista del portal de cliente y elimina
-        el selector de envío de facturas.
+        Este módulo hereda la vista del portal de cliente, elimina
+        el selector de envío de facturasy agrega campos adicionales
+        para que el cliente pueda subir su informaciópn de facuraciónn
+        directamente desde su portal de usuario.
     """,
-
     'author': "Maharba",
-    'website': "http://www.tuweb.com",
     'category': 'Website/Portal',
     'version': '1.0',
 

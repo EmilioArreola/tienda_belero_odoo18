@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <record id="view_portal_my_details_inherit_edi" model="ir.ui.view">
+            <field name="name">portal.my.details.inherit.edi</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="account_edi.portal_my_details"/>
+            <field name="arch" type="xml">
+                <xpath expr="//select[@name='invoice_edi_format']/.." position="attributes">
+                    <attribute name="style">display: none !important;</attribute>
+                </xpath>
+            </field>
+        </record>
+        </data>
+</odoo>

@@ -1,17 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        
-        <record id="view_portal_my_details_inherit_edi" model="ir.ui.view">
-            <field name="name">portal.my.details.inherit.edi</field>
+        <record id="view_portal_my_details_inherit_mx" model="ir.ui.view">
+            <field name="name">portal.my.details.inherit.mx</field>
             <field name="inherit_id" ref="account_edi.portal_my_details"/>
             <field name="arch" type="xml">
-                
+
                 <xpath expr="//select[@name='invoice_edi_format']/.." position="replace">
                 </xpath>
 
-                </field>
-        </record>
+                <xpath expr="//div[hasclass('o_portal_contact_details')]//input[@name='name']/.." position="after">
+                    
+                    <div class="col-xl-6 mb-3">
+                        <label class="col-form-label" for="vat">RFC</label>
+                        <input type="text" name="vat" 
+                               class="form-control" 
+                               t-att-value="partner.vat" 
+                               placeholder="Ej. XAXX010101000"/>
+                    </div>
 
+                    <div class="col-xl-6 mb-3">
+                        <label class="col-form-label" for="l10n_mx_edi_fiscal_regime">Régimen Fiscal (Código)</label>
+                        <select name="l10n_mx_edi_fiscal_regime" class="form-control">
+                            <option value="">Seleccione...</option>
+                            <option t-att-selected="partner.l10n_mx_edi_fiscal_regime == '601'" value="601">601 - General de Ley Personas Morales</option>
+                            <option t-att-selected="partner.l10n_mx_edi_fiscal_regime == '603'" value="603">603 - Personas Morales con Fines no Lucrativos</option>
+                            <option t-att-selected="partner.l10n_mx_edi_fiscal_regime == '605'" value="605">605 - Sueldos y Salarios</option>
+                            <option t-att-selected="partner.l10n_mx_edi_fiscal_regime == '606'" value="606">606 - Arrendamiento</option>
+                            <option t-att-selected="partner.l10n_mx_edi_fiscal_regime == '612'" value="612">612 - Personas Físicas con Actividades Empresariales</option>
+                            <option t-att-selected="partner.l10n_mx_edi_fiscal_regime == '621'" value="621">621 - Incorporación Fiscal</option>
+                            <option t-att-selected="partner.l10n_mx_edi_fiscal_regime == '626'" value="626">626 - Régimen Simplificado de Confianza (RESICO)</option>
+                            </select>
+                    </div>
+                </xpath>
+
+                <xpath expr="//label[@for='name']" position="replace">
+                    <label class="col-form-label" for="name">Nombre o Razón Social</label>
+                </xpath>
+
+            </field>
+        </record>
     </data>
 </odoo>

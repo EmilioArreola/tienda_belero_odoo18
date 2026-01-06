@@ -1,30 +1,16 @@
 # -*- coding: utf-8 -*-
 {
     'name': "Personalización de información del cliente en Mi cuenta",
-
-    'summary': """
-        Modifica los datos que le pide al cliente en su portal de usuario Mi cuenta.""",
-
-    'description': """
-        Este módulo hereda la vista del portal de cliente, elimina
-        el selector de envío de facturas y agrega campos adicionales
-        para que el cliente pueda subir su información de facturación
-        directamente desde su portal de usuario.
-    """,
-    'author': "Maharba",
+    'summary': """Modifica los datos del portal Mi cuenta.""",
+    'description': """Agrega RFC, Razón Social y Régimen Fiscal al portal.""",
+    'author': "Abraham y Carla",
     'category': 'Website/Portal',
-    'version': '1.1',
-
-    # DEPENDENCIAS:
-    # CORRECCIÓN IMPORTANTE: Agregamos 'account_edi' porque tu XML hereda de él.
-    'depends': ['portal', 'account', 'account_edi'],
-
-    # ARCHIVOS DE DATOS:
+    'version': '1.2',
+    # Agregamos 'l10n_mx_edi' para tener acceso al campo de Régimen Fiscal estándar
+    'depends': ['portal', 'account', 'account_edi', 'l10n_mx_edi'],
     'data': [
         'views/portal_templates.xml',
     ],
-
     'installable': True,
-    'application': False,
     'license': 'LGPL-3',
 }

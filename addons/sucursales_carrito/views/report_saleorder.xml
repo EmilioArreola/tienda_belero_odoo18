@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_saleorder_document_sucursal" inherit_id="sale.report_saleorder_document">
+        
+        <xpath expr="//div[@id='informations']" position="inside">
+            
+            <div t-if="doc.carrier_id and doc.carrier_id.es_recogida_tienda and doc.sucursal_recogida" 
+                 class="col-auto col-3 mw-100 mb-2">
+                <strong>Recoger en la sucursal:</strong>
+                <p class="m-0" t-field="doc.sucursal_recogida"/>
+            </div>
+            
+        </xpath>
+
+    </template>
+</odoo>

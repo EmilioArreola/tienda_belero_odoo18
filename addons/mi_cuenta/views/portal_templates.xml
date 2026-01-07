@@ -1,41 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0"?>
 <odoo>
     <data>
-        
-        <record id="view_portal_my_details_visual_simple" model="ir.ui.view">
-            <field name="name">portal.my.details.visual.simple</field>
-            <field name="model">res.partner</field>
-            <field name="inherit_id" ref="portal.portal_my_details"/>
-            <field name="arch" type="xml">
-
-                <xpath expr="//select[@name='invoice_edi_format']/.." position="replace">
-                </xpath>
-
-                <xpath expr="//label[@for='name']" position="replace">
-                    <label class="col-form-label" for="name">Razón Social</label>
-                </xpath>
-
-                <xpath expr="//div[hasclass('o_portal_contact_details')]//input[@name='name']/.." position="after">
-                    
-                    <div class="col-xl-6 mb-3">
-                        <label class="col-form-label" for="vat">RFC</label>
-                        <input type="text" name="vat" 
-                               class="form-control" 
-                               t-att-value="partner.vat" 
-                               placeholder="Ej. XAXX010101000"/>
-                    </div>
-
-                    <div class="col-xl-6 mb-3">
-                        <label class="col-form-label" for="regimen_temp">Régimen Fiscal</label>
-                        <input type="text" name="regimen_temp" 
-                               class="form-control" 
-                               placeholder="Escribe tu régimen aquí..."/>
-                    </div>
-
-                </xpath>
-
-            </field>
-        </record>
-
+        <template id="break_odoo_test" inherit_id="portal.portal_layout">
+            <xpath expr="//body" position="inside">
+                <h1 style="color:red;font-size:40px;">
+                    🚨 SI VES ESTO, ESTE MÓDULO SÍ SE ESTÁ CARGANDO
+                </h1>
+            </xpath>
+        </template>
     </data>
 </odoo>

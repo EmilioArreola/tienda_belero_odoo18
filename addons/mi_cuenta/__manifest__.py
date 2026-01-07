@@ -1,18 +1,28 @@
 # -*- coding: utf-8 -*-
 {
     'name': "Mi Cuenta Personalización",
-    'summary': "Vista simple con RFC y Régimen",
-    'description': "Módulo visual para modificar el portal.",
-    'author': "Abraham y Carla",
+    'summary': "Vista simple con RFC y Régimen en el portal",
+    'description': """
+        Módulo para personalizar el portal del cliente:
+        - Oculta el selector de formato electrónico (EDI).
+        - Añade campos para RFC (vat) y Régimen Fiscal.
+        - Cambia la etiqueta 'Nombre' por 'Razón Social'.
+    """,
+    'author': "Abraham y Carla 1.1.1",
     'category': 'Website/Portal',
     'version': '1.1',
     
-    # Solo dependemos del portal base
+    # DEPENDENCIAS:
+    # 'portal': Para la vista base de detalles (nombre, email).
+    # 'account': CRUCIAL para poder modificar/ocultar el campo 'invoice_edi_format'.
     'depends': ['portal', 'account'], 
 
+    # VISTAS:
     'data': [
         'views/portal_templates.xml',
     ],
+    
     'installable': True,
+    'application': False, # False porque es un módulo técnico/extensión, no una App principal
     'license': 'LGPL-3',
 }

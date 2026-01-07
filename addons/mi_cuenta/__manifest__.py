@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Personalización de información del cliente en Mi cuenta",
-    'summary': """Modifica los datos del portal Mi cuenta.""",
-    'description': """Agrega RFC, Razón Social y Régimen Fiscal al portal.""",
+    'name': "Mi Cuenta Personalización",
+    'summary': "Vista simple con RFC y Régimen",
+    'description': "Módulo visual para modificar el portal.",
     'author': "Abraham y Carla",
     'category': 'Website/Portal',
-    'version': '1.2',
-    # Agregamos 'l10n_mx_edi' para tener acceso al campo de Régimen Fiscal estándar
-    'depends': ['portal', 'account', 'account_edi', 'l10n_mx_edi'],
+    'version': '1.0',
+    
+    # Solo dependemos del portal base
+    'depends': ['portal', 'account'], 
+
     'data': [
         'views/portal_templates.xml',
     ],

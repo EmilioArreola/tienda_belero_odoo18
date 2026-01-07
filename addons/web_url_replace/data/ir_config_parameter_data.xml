@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <data noupdate="1">
-        <record id="param_web_replace_url" model="ir.config_parameter">
-            <field name="key">web.replace.url</field>
-            <field name="value">smarts</field>
-        </record>
-    </data>
-</odoo>

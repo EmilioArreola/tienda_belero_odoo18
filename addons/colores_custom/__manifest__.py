@@ -3,7 +3,7 @@
     'version': '1.0',
     'category': 'Theme',
     'summary': 'Cambia el color del navbar y elimina el morado de Odoo',
-    'author': 'Abraham',
+    'author': 'SmApps',
     'depends': ['web'],
     'data': [
         'views/report_sale_custom.xml',

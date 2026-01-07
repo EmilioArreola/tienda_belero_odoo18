@@ -1,7 +1,7 @@
 {
     "name": "Terminator",
     "version": "1.0.1",
-    "author": "Abraham Arreola Cru",
+    "author": "SmApps",
     "website": "https://www.belero.com",
     "category": "Customization",
     "summary": "Personalizaciones visuales para Odoo (ocultar menús, títulos, etc.)",

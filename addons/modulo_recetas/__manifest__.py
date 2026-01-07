@@ -2,7 +2,7 @@
 {
     'name': "Módulo de Recetas",
     'summary': "Un recetario de cocina integrado con tu sitio web de Odoo.",
-    'author': "Maharba",
+    'author': "SmApps",
     'category': 'Website',
     'version': '1.3', # Incrementa la versión
     'license': 'LGPL-3',

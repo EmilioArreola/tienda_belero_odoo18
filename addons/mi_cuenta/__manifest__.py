@@ -5,7 +5,7 @@
     'description': "Módulo visual para modificar el portal.",
     'author': "Abraham y Carla",
     'category': 'Website/Portal',
-    'version': '1.0',
+    'version': '1.1',
     
     # Solo dependemos del portal base
     'depends': ['portal', 'account'], 

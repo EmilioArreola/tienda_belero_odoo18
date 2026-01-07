@@ -14,6 +14,8 @@
             'colores_custom/static/src/css/colores.css',
         ],
     },
+    
+    'icon': '/colores_custom/static/description/icon.png',
     'installable': True,
     'application': False,
 }

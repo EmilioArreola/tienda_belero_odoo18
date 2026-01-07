@@ -18,6 +18,7 @@
         ],
     },
 
+    'icon': '/belero_web_custom/static/description/icon.png',
     "installable": True,
     "application": False,
     "license": "LGPL-3",

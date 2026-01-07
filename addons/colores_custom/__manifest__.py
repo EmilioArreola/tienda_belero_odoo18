@@ -15,7 +15,7 @@
         ],
     },
     
-    'icon': '/colores_custom/static/description/icon.png',
     'installable': True,
     'application': False,
+    'icon': '/colores_custom/static/description/icon.png',
 }

@@ -20,8 +20,8 @@
         ],
     },
 
-    'icon': '/modulo_recetas/static/description/icon.png',
     'installable': True,
     'application': True,
     'auto_install': False,
+    'icon': '/modulo_recetas/static/description/icon.png',
 }

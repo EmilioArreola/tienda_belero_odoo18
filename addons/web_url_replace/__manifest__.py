@@ -5,5 +5,6 @@
     "installable": True,
     "application": False,
     "depends": ["web"],
-   
+
+    'icon': '/web_url_replace/static/description/icon.png',
 }

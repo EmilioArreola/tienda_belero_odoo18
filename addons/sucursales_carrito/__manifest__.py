@@ -25,9 +25,10 @@
             'sucursales_carrito/static/src/css/sucursales_checkout.css',
         ],
     },
-    'icon': '/sucursales_carrito/static/description/icon.png',
+    
     'installable': True,
     'application': False,
     'auto_install': False,
     'license': 'LGPL-3',
+    'icon': '/sucursales_carrito/static/description/icon.png',
 }

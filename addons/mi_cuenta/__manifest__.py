@@ -21,8 +21,9 @@
     'data': [
         'views/portal_templates.xml',
     ],
-    'icon': '/mi_cuenta/static/description/icon.png',
+    
     'installable': True,
     'application': False, # False porque es un módulo técnico/extensión, no una App principal
     'license': 'LGPL-3',
+    'icon': '/mi_cuenta/static/description/icon.png',
 }

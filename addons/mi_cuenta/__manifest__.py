@@ -8,7 +8,7 @@
         - Añade campos para RFC (vat) y Régimen Fiscal.
         - Cambia la etiqueta 'Nombre' por 'Razón Social'.
     """,
-    'author': "SmApps 123",
+    'author': "SmApps",
     'category': 'Website/Portal',
     'version': '2.2',
     

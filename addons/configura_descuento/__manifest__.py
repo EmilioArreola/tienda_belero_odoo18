@@ -8,7 +8,7 @@
         2. Validar y bloquear en la línea de cotización si se excede ese límite.
         3. Mostrar el límite permitido visualmente en la orden de venta.
     """,
-    'author': "Maharba112",
+    'author': "SmApps",
     'version': '1.0',
     'depends': ['base', 'sale', 'product'],
     'data': [
@@ -18,4 +18,6 @@
     'installable': True,
     'application': False,
     'license': 'LGPL-3',
+    'icon': '/configura_descuento/static/description/icon.png',
+
 }

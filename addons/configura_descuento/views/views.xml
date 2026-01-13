@@ -1,0 +1,62 @@
+<odoo>
+    <record id="view_discount_config_form" model="ir.ui.view">
+        <field name="name">discount.config.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="99"/>
+        <field name="arch" type="xml">
+            <form string="Configuración de Descuentos">
+                <header>
+                    <button string="Guardar" type="object" name="execute" class="oe_highlight"/>
+                    <button string="Cancelar" type="object" name="cancel" special="cancel"/>
+                </header>
+                <sheet>
+                    <h2>Control de Descuentos</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="global_max_discount"/>
+                                <div class="text-muted">
+                                    Límite por defecto (0 = No se permiten descuentos).
+                                </div>
+                                <div class="mt16">
+                                    <field name="global_max_discount" style="width: 70px; text-align: right;"/>
+                                    <span class="o_form_label" style="margin-left: 5px;">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_discount_config" model="ir.actions.act_window">
+        <field name="name">Límite de Descuentos</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_discount_config_form"/>
+        <field name="target">inline</field>
+    </record>
+
+    <menuitem id="menu_discount_config"
+              name="Límite de Descuentos"
+              parent="sale.menu_sale_config"
+              action="action_discount_config"
+              sequence="10"/>
+
+    <record id="view_order_form_discount_limit_display" model="ir.ui.view">
+        <field name="name">sale.order.form.discount.limit.display</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/list//field[@name='discount']" position="after">
+                
+                <field name="current_max_discount" 
+                       optional="show" 
+                       decoration-danger="discount > current_max_discount"
+                       />
+            </xpath>
+        </field>
+    </record>
+</odoo>

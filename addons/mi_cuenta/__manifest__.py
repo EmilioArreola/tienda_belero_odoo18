@@ -8,9 +8,9 @@
         - Añade campos para RFC (vat) y Régimen Fiscal.
         - Cambia la etiqueta 'Nombre' por 'Razón Social'.
     """,
-    'author': "SmApps 11",
+    'author': "SmApps 123",
     'category': 'Website/Portal',
-    'version': '1.1',
+    'version': '2.2',
     
     # DEPENDENCIAS:
     # 'portal': Para la vista base de detalles (nombre, email).
@@ -19,9 +19,9 @@
 
     # VISTAS:
     'data': [
-        'views/portal_templates.xml',
+        'views/portal_add_fields.xml',  # El que acabamos de arreglar
     ],
-    
+
     'installable': True,
     'application': False, # False porque es un módulo técnico/extensión, no una App principal
     'license': 'LGPL-3',

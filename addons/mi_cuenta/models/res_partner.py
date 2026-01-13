@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields
+import logging
+
+_logger = logging.getLogger(__name__)
+
+print("\n\n" + "="*50)
+print("¡¡¡HOLA!!! EL ARCHIVO RES_PARTNER.PY SE ESTÁ CARGANDO")
+print("="*50 + "\n\n")
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    # Creamos un campo nuevo para guardar lo que escriban en "Régimen"
-    # Le pongo 'x_' para indicar que es personalizado, aunque no es obligatorio.
-    x_regimen_fiscal = fields.Char(string='Régimen Fiscal')
+    x_regimen_fiscal = fields.Char(string="Régimen Fiscal (MX)")
+    x_uso_cfdi = fields.Char(string="Uso de CFDI (MX)")

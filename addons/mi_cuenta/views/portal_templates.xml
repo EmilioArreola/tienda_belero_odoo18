@@ -2,33 +2,50 @@
 <odoo>
     <data>
 
-        <record id="view_portal_add_regimen_safe" model="ir.ui.view">
-            <field name="name">portal.my.details.add.regimen</field>
+        <record id="account.portal_my_details_fields" model="ir.ui.view">
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="view_portal_mx_custom_fields" model="ir.ui.view">
+            <field name="name">portal.mx.custom.fields</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="portal.portal_my_details"/>
-            <field name="priority">20</field>
+            <field name="priority">50</field>
             <field name="arch" type="xml">
                 
                 <xpath expr="//button[@type='submit']/.." position="before">
                     
                     <div class="row">
+                        <div class="col-12 mt-3 mb-3">
+                            <hr/>
+                            <h5 style="color: #666;">Datos de Facturación (MX)</h5>
+                        </div>
+
                         <div class="col-xl-6 mb-3">
-                            <label class="col-form-label" for="x_regimen_fiscal">Régimen Fiscal</label>
-                            <input type="text"
-                                   name="x_regimen_fiscal"
-                                   class="form-control"
-                                   t-att-value="partner.x_regimen_fiscal or ''"
-                                   placeholder="Ej. 601 - General de Ley Personas Morales"/>
+                            <label class="col-form-label">RFC</label>
+                            <input type="text" name="vat" class="form-control"
+                                   t-att-value="partner.vat or ''" 
+                                   placeholder="XAXX010101000"/>
+                        </div>
+
+                        <div class="col-xl-6 mb-3">
+                            <label class="col-form-label">Régimen Fiscal</label>
+                            <input type="text" name="x_regimen_fiscal" class="form-control"
+                                   t-att-value="partner.x_regimen_fiscal or ''" 
+                                   placeholder="Ej. 601 - General de Ley PM"/>
+                        </div>
+
+                        <div class="col-xl-6 mb-3">
+                            <label class="col-form-label">Uso de CFDi</label>
+                            <input type="text" name="x_uso_cfdi" class="form-control"
+                                   t-att-value="partner.x_uso_cfdi or ''" 
+                                   placeholder="Ej. G03 - Gastos en general"/>
                         </div>
                     </div>
 
                 </xpath>
 
             </field>
-        </record>
-
-        <record id="account.portal_my_details_fields" model="ir.ui.view">
-            <field name="active" eval="False"/>
         </record>
 
     </data>

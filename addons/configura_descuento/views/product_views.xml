@@ -1,18 +1,53 @@
 <odoo>
-    <record id="view_product_template_form_discount" model="ir.ui.view">
-        <field name="name">product.template.form.discount</field>
+    <record id="view_product_template_form_discount_and_prices" model="ir.ui.view">
+        <field name="name">product.template.form.discount.and.prices</field>
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
-            <xpath expr="//page[@name='sales']//group[@name='sale']" position="inside">
+            
+            <xpath expr="//page[@name='sales']" position="inside">
                 
-                <label for="product_max_discount" string="Desc. Máximo Específico"/>
-                <div class="o_row">
-                    <field name="product_max_discount" style="width: 50px !important;"/>
-                    <span class="text-muted" style="margin-left: 5px;">% (0 = Usa Global)</span>
-                </div>
+                <separator string="Tabla de Precios y Límites" style="margin-top: 20px;"/>
+                
+                <group>
+                    <group string="Definir Opciones">
+                        <label for="price_1" string="Opción 1"/>
+                        <div class="o_row">
+                            <span class="text-muted">Precio:</span> <field name="price_1" widget="monetary"/>
+                            <span class="text-muted pl-2">| Max Desc:</span> <field name="discount_1" style="width: 40px;"/> %
+                        </div>
+                        
+                        <label for="price_2" string="Opción 2"/>
+                        <div class="o_row">
+                            <span class="text-muted">Precio:</span> <field name="price_2" widget="monetary"/>
+                            <span class="text-muted pl-2">| Max Desc:</span> <field name="discount_2" style="width: 40px;"/> %
+                        </div>
+
+                        <label for="price_3" string="Opción 3"/>
+                        <div class="o_row">
+                            <span class="text-muted">Precio:</span> <field name="price_3" widget="monetary"/>
+                            <span class="text-muted pl-2">| Max Desc:</span> <field name="discount_3" style="width: 40px;"/> %
+                        </div>
+
+                        <label for="price_4" string="Opción 4"/>
+                        <div class="o_row">
+                            <span class="text-muted">Precio:</span> <field name="price_4" widget="monetary"/>
+                            <span class="text-muted pl-2">| Max Desc:</span> <field name="discount_4" style="width: 40px;"/> %
+                        </div>
+                    </group>
+                    
+                    <group string="Selección Activa">
+                        <div class="alert alert-info" role="alert" style="margin-top: 10px;">
+                            Selecciona una tarifa para aplicar sus reglas de <b>Precio</b> y <b>Descuento</b>.
+                        </div>
+                        <field name="active_price_selector" widget="radio"/>
+                        
+                        
+                    </group>
+                </group>
 
             </xpath>
+            
         </field>
     </record>
 </odoo>

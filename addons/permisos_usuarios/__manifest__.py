@@ -2,7 +2,7 @@
 {
     'name': "Permisos Personalizados",
     'summary': "Agrega niveles de acceso extra para la gestión de Contactos.",
-    'author': "Maharba",
+    'author': 'SmApps',
     'category': 'Administration',
     'version': '1.0',
     'license': 'LGPL-3',
@@ -17,5 +17,6 @@
     ],
 
     'installable': True,
-    'application': False, # False porque es un módulo técnico/extensión
+    'application': False, # False porque es un módulo técnico/
+    'icon': '/permisos_usuarios/static/description/icon.png',
 }

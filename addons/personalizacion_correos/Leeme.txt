@@ -1,0 +1,7 @@
+La idea del siguiente módulo es hacer personalizables el contenido de los correos de recuperación,
+ya que al menos hoy, no encontré la plantilla donde se genera esté correo, si en un fúturo 
+se encuentra dicha plantilla, este módulo no deberia de utilizarse 
+
+EAAC    (06/02/26)
+
+#ea6437

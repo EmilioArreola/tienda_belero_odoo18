@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="reset_password_email_custom" model="mail.template">
+            <field name="name">Restablecimiento de contraseña - Personalizado</field>
+            <field name="model_id" ref="base.model_res_users"/>
+            <field name="subject">Restablecimiento de contraseña - {{ object.company_id.name }}</field>
+            <field name="email_from">{{ (object.company_id.email or user.email) }}</field>
+            <field name="email_to">{{ object.email }}</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+    <div style="margin: 0px; padding: 0px; font-size: 13px;">
+        Hola <t t-out="object.name or ''"/>,
+        <br/><br/>
+        Alguien ha solicitado restablecer la contraseña de tu cuenta en 
+        <strong><t t-out="object.company_id.name or ''"/></strong>.
+        <br/><br/>
+        
+        <div style="background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <strong>⚠️ Nueva Política de Seguridad</strong><br/>
+            Tu nueva contraseña debe cumplir con lo siguiente:
+            <ul style="margin-bottom: 0; margin-top: 5px; padding-left: 20px;">
+                <li>Mínimo <strong>8 caracteres</strong>.</li>
+                <li>Al menos <strong>1 Número</strong>.</li>
+                <li>Al menos <strong>1 Mayúscula</strong> y <strong>1 Minúscula</strong>.</li>
+            </ul>
+        </div>
+
+        Para continuar, haz clic en el siguiente botón:
+        <div style="margin: 16px 0px 16px 0px;">
+            <a t-attf-href="{{ object._get_reset_password_url() }}"
+               style="background-color: #ea6437; padding: 10px 20px; text-decoration: none; color: #fff; border-radius: 5px; font-weight: bold;">
+                Cambiar mi Contraseña
+            </a>
+        </div>
+        
+        <span style="font-size: 12px; color: #777;">
+            Si no solicitaste este cambio, ignora este mensaje. Tu contraseña actual seguirá siendo segura.
+        </span>
+        <br/><br/>
+        Saludos,
+        <br/>
+        <t t-out="user.signature or ''"/>
+    </div>
+</div>
+            </field>
+        </record>
+    </data>
+</odoo>

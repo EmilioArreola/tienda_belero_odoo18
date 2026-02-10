@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import re
+import logging
 from odoo import http, _
 from odoo.http import request
 from odoo.exceptions import UserError
 from odoo.addons.auth_signup.controllers.main import AuthSignupHome
+
+_logger = logging.getLogger(__name__)
 
 
 class AuthSignupHomeExtended(AuthSignupHome):
@@ -65,15 +68,42 @@ class AuthSignupHomeExtended(AuthSignupHome):
 
     @http.route()
     def web_auth_reset_password(self, *args, **kw):
-        """Sobrescribe el método de reseteo de contraseña para validar"""
+        """
+        Sobrescribe el método de reset de contraseña.
+        Maneja tanto la SOLICITUD de reset como el ESTABLECIMIENTO de nueva contraseña.
+        """
+        _logger.info("="*60)
+        _logger.info("🌐 web_auth_reset_password ejecutado")
+        _logger.info(f"Método: {request.httprequest.method}")
+        _logger.info(f"Parámetros: {list(kw.keys())}")
+        _logger.info("="*60)
+        
         if request.httprequest.method == 'POST':
+            # Si hay password, es el paso 2: establecer nueva contraseña
             password = kw.get('password')
             if password:
+                _logger.info("📝 Validando nueva contraseña...")
                 try:
                     self._validate_password_policy(password)
+                    _logger.info("✅ Contraseña válida")
                 except UserError as e:
+                    _logger.error(f"❌ Contraseña inválida: {str(e)}")
                     qcontext = self.get_auth_signup_qcontext()
                     qcontext['error'] = str(e)
                     return request.render('auth_signup.reset_password', qcontext)
+            
+            # Si hay login/email pero no password, es el paso 1: solicitar reset
+            login = kw.get('login')
+            if login and not password:
+                _logger.info(f"📧 Solicitando reset para: {login}")
         
-        return super(AuthSignupHomeExtended, self).web_auth_reset_password(*args, **kw)
+        try:
+            result = super(AuthSignupHomeExtended, self).web_auth_reset_password(*args, **kw)
+            _logger.info("✅ Reset password exitoso")
+            return result
+        except Exception as e:
+            _logger.error(f"❌ Error en reset password: {str(e)}")
+            # Capturar el error y mostrar mensaje amigable
+            qcontext = self.get_auth_signup_qcontext()
+            qcontext['error'] = _("Hubo un error al procesar tu solicitud. Por favor intenta de nuevo.")
+            return request.render('auth_signup.reset_password', qcontext)

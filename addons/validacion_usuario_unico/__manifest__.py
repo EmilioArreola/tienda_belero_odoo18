@@ -9,4 +9,5 @@
     'installable': True,
     'application': False,
     'license': 'LGPL-3',
+    'icon': '/validacion_usuario_unico/static/description/icon.png',
 }

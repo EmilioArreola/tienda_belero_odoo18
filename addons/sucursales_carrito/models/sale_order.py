@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
 from odoo.http import request
 import logging
 
@@ -9,7 +8,6 @@ _logger = logging.getLogger(__name__)
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    # 1. LISTA LIMPIA (Sin la opción de error)
     sucursal_recogida = fields.Selection([
         ('escuadron_201', 'Escuadrón 201'),
         ('lazaro_cardenas', 'Av. Lázaro Cárdenas'),
@@ -21,64 +19,38 @@ class SaleOrder(models.Model):
         ('cristobal_colon', 'Carretera Cristóbal Colón'),
         ('yagul', 'Calle Yagul'),
         ('vicente_guerrero', 'Vicente Guerrero'),
-    ], string='📍 Sucursal de Recogida', 
-       copy=False, 
-       tracking=True)
+    ], string='📍 Sucursal de Recogida', copy=False, tracking=True)
 
     def _es_metodo_recogida(self):
+        """Verifica si el método de envío es de tipo recogida"""
         self.ensure_one()
         return self.carrier_id and self.carrier_id.es_recogida_tienda
 
-    # -------------------------------------------------------------------------
-    # EL ESCUDO PROTECTOR (Mantiene el dato seguro)
-    # -------------------------------------------------------------------------
-    def write(self, vals):
-        if 'sucursal_recogida' in vals and not vals['sucursal_recogida']:
-            for order in self:
-                if order.sucursal_recogida: # Si ya tiene sucursal...
-                    carrier_id = vals.get('carrier_id') or order.carrier_id.id
-                    es_recogida = False
-                    if carrier_id:
-                        carrier = self.env['delivery.carrier'].browse(carrier_id)
-                        es_recogida = carrier.es_recogida_tienda
-
-                    if es_recogida:
-                        # Ignoramos el borrado accidental de Odoo
-                        del vals['sucursal_recogida']
-                        break 
-        return super(SaleOrder, self).write(vals)
-
-    # -------------------------------------------------------------------------
-    # VALIDACIÓN FINAL
-    # -------------------------------------------------------------------------
     def action_confirm(self):
-        for order in self:
-            if order._es_metodo_recogida():
-                
-                # Intento de rescate desde sesión
-                if not order.sucursal_recogida and request:
-                    try:
-                        sucursal_backup = request.session.get('sucursal_carrito_backup')
-                        if sucursal_backup:
-                            # Verificamos que el valor de respaldo sea válido en la lista nueva
-                            # (para evitar errores si el respaldo era basura)
-                            dict_sucursales = dict(self._fields['sucursal_recogida'].selection)
-                            if sucursal_backup in dict_sucursales:
-                                order.sudo().write({'sucursal_recogida': sucursal_backup})
-                    except: pass
+        """
+        Sobrescribimos confirmar para:
+        1. Rescatar la sucursal de la sesión si falta (para que salga en el PDF).
+        2. Limpiar líneas duplicadas.
+        """
+        # 1. RESCATE DE SEGURIDAD
+        # Si el usuario eligió sucursal en la web pero no se guardó en la BD,
+        # la recuperamos de la cookie de sesión AQUÍ, justo antes de confirmar.
+        if request and getattr(request, 'session', None):
+            sucursal_backup = request.session.get('sucursal_carrito_backup')
+            if sucursal_backup:
+                # Solo aplicamos a órdenes que no tengan el dato
+                for order in self:
+                    if not order.sucursal_recogida:
+                        _logger.info(f"🚑 [PDF Rescue] Guardando sucursal '{sucursal_backup}' en orden {order.name}")
+                        order.sudo().write({'sucursal_recogida': sucursal_backup})
 
-                # Relectura forzosa
-                order.invalidate_recordset(['sucursal_recogida'])
-                
-                # Si sigue vacía, NO ponemos valor falso, simplemente avisamos en el chat.
-                if not order.sucursal_recogida:
-                    _logger.warning(f"⚠️ Orden {order.name} confirmada SIN sucursal.")
-                    
-                    # El mensaje rojo sigue siendo nuestra mejor alerta
-                    order.message_post(body=_(
-                        "🛑 <b>¡ALERTA DE SISTEMA!</b><br/>"
-                        "El cliente pagó pero la sucursal no se seleccionó.<br/>"
-                        "<b>Contactar al cliente inmediatamente.</b>"
-                    ), message_type="comment", subtype_xmlid="mail.mt_note")
+        # 2. LIMPIEZA DE DUPLICADOS
+        for order in self:
+            # Solo si es método de recogida
+            if order._es_metodo_recogida():
+                delivery_lines = order.order_line.filtered(lambda l: l.is_delivery)
+                if len(delivery_lines) > 1:
+                    # Si hay más de una línea de envío, borramos las sobras
+                    delivery_lines[1:].unlink()
 
         return super(SaleOrder, self).action_confirm()

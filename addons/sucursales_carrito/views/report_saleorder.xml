@@ -5,14 +5,12 @@
             
             <xpath expr="//div[@id='informations']" position="inside">
                 
-                <div t-if="doc.carrier_id and doc.carrier_id.es_recogida_tienda and doc.sucursal_recogida" 
-                     class="col-auto col-3 mw-100 mb-2">
-                    <strong>Recoger en la sucursal:</strong>
+                <div t-if="doc.sucursal_recogida" class="col-auto col-3 mw-100 mb-2">
+                    <strong>Sucursal de Recogida:</strong>
                     <p class="m-0" t-field="doc.sucursal_recogida"/>
                 </div>
 
-                <div t-if="doc.carrier_id and not doc.carrier_id.es_recogida_tienda" 
-                     class="col-auto col-3 mw-100 mb-2">
+                <div t-if="doc.carrier_id and not doc.sucursal_recogida" class="col-auto col-3 mw-100 mb-2">
                     <strong>Método de Envío:</strong>
                     <p class="m-0" t-field="doc.carrier_id.name"/>
                 </div>

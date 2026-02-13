@@ -28,72 +28,33 @@ publicWidget.registry.SelectorSucursales = publicWidget.Widget.extend({
     // -------------------------------------------------------------------------
     _secuestrarBotonConfirmar: function () {
         const self = this;
-        // Selectores de los botones que finalizan la compra
-        const botonSelector = 'a[href="/shop/payment"], button[name="o_payment"], .o_sale_confirm, a[name="website_sale_main_button"], a[href*="/shop/confirm_order"]';
+        const botonSelector = 'button[name="o_payment"], .o_sale_confirm, a[href*="/shop/confirm_order"]';
 
-        // Usamos onClick en el documento para atraparlo antes que nadie
-        document.addEventListener('click', async function (e) {
-            const target = e.target.closest(botonSelector);
-            if (!target) return;
-
-            // 1. Verificamos si debemos intervenir (¿Es recogida?)
-            const $wrapper = self.$('#sucursal_picker_wrapper');
-            if (!$wrapper.length || $wrapper.hasClass('d-none')) {
-                return; // No es recogida, dejamos que Odoo haga su trabajo
-            }
-
-            // 2. DETENEMOS TODO INMEDIATAMENTE
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-
-            // 3. Validación Visual
-            const valor = self.$('#sucursal_select').val();
-            if (!valor) {
-                alert("⚠️ Por favor selecciona una sucursal para recoger tu pedido.");
-                self._resaltarError();
-                return;
-            }
-
-            // 4. BLOQUEO VISUAL
-            const $btn = $(target);
-            const textoOriginal = $btn.text();
-            $btn.text("Guardando y Procesando...").prop('disabled', true).addClass('disabled');
-
-            try {
-                // 5. GUARDADO CRÍTICO (Esperamos respuesta del servidor)
-                console.log("⏳ Enviando sucursal:", valor);
-                await rpc('/shop/update_sucursal', { sucursal: valor });
-                console.log("✅ Servidor confirmó guardado. Cookie actualizada.");
-
-                // 6. EJECUCIÓN MANUAL (Bypasseando JS de Odoo)
-                // Aquí está el truco: No hacemos click, hacemos lo que el click haría.
+        $(document).on('click', botonSelector, async function (ev) {
+            const $wrapper = $('#sucursal_picker_wrapper');
+            
+            // Solo intervenimos si el selector de sucursales es visible (es recogida)
+            if ($wrapper.length && !$wrapper.hasClass('d-none')) {
+                const valor = $('#sucursal_select').val();
                 
-                if (target.tagName === 'BUTTON' || target.type === 'submit') {
-                    // Si es un botón, buscamos su formulario y lo enviamos NATIVAMENTE
-                    const form = target.closest('form');
-                    if (form) {
-                        console.log("🚀 Enviando formulario nativamente...");
-                        form.submit(); // Esto envía el form sin disparar validaciones JS de nuevo
-                    } else {
-                        console.error("No se encontró formulario para el botón");
-                        window.location.reload(); // Fallback
-                    }
-                } else if (target.tagName === 'A' && target.href) {
-                    // Si es un enlace, navegamos
-                    console.log("🚀 Navegando a:", target.href);
-                    window.location.href = target.href;
+                if (!valor) {
+                    // BLOQUEO TOTAL si no hay sucursal
+                    ev.preventDefault();
+                    ev.stopImmediatePropagation();
+                    alert("⚠️ Por favor selecciona una sucursal para recoger tu pedido.");
+                    self._resaltarError();
+                    return false; 
                 }
 
-            } catch (error) {
-                console.error("❌ Error fatal:", error);
-                $btn.text(textoOriginal).prop('disabled', false).removeClass('disabled');
-                alert("Hubo un error de conexión. Intenta de nuevo.");
+                // Si hay valor, lo guardamos asíncronamente
+                // NO usamos preventDefault aquí para que, tras el 'await', Odoo siga su flujo
+                await rpc('/shop/update_sucursal', { sucursal: valor });
+                
+                // Al no haber preventDefault ni form.submit() manual, 
+                // Odoo ejecutará sus validaciones de pago normales ahora que ya guardamos la sucursal.
             }
-
-        }, true); // 'true' = Capture Phase (Somos los primeros en enterarnos)
+        });
     },
-
     // -------------------------------------------------------------------------
     // FUNCIONES AUXILIARES (Sin cambios)
     // -------------------------------------------------------------------------

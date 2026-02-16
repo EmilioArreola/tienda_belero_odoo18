@@ -4,8 +4,11 @@
     'summary': 'Evita la creación de usuarios con datos duplicados (Email/DNI)',
     'category': 'Administration',
     'author': 'Tu Nombre o Empresa',
-    'depends': ['base'],
-    'data': [],
+    'depends': ['base','contacts','website_sale',],
+    'data': [
+        'views/res_partner_views.xml',
+        'views/sale_order_views.xml',
+    ],
     'installable': True,
     'application': False,
     'license': 'LGPL-3',

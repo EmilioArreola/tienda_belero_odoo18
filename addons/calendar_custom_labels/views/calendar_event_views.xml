@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_calendar_event_form_inherit_label_full" model="ir.ui.view">
+        <field name="name">calendar.event.form.inherit.label.full</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='set_discuss_videocall_location']//span[last()]" position="replace">
+                <span> Reunión</span>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_calendar_event_form_inherit_label_quick" model="ir.ui.view">
+        <field name="name">calendar.event.form.inherit.label.quick</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form_quick_create"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='set_discuss_videocall_location']//span[last()]" position="replace">
+                <span> Reunión</span>
+            </xpath>
+        </field>
+    </record>
+</odoo>

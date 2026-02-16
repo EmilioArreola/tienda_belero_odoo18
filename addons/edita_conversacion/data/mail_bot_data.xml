@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="translation_mail_bot_welcome" model="ir.translation">
+        <field name="name">mail.bot,body</field>
+        <field name="res_id" eval="0"/> <field name="lang">es_MX</field>
+        <field name="type">model</field>
+        <field name="src">Hola, Odoo's chat helps employees collaborate efficiently. I'm here to help you discover its features. Try to send me an emoji :)</field>
+        <field name="value">Hola, los chats de Belero ayudan a que los empleados colaboren con eficiencia. Estoy aquí para ayudarte a que descubras sus funciones. Intenta enviarme un emoji :)</field>
+        <field name="state">translated</field>
+    </record>
+</odoo>

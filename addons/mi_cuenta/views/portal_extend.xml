@@ -2,19 +2,6 @@
 <odoo>
     <data>
 
-        <!-- OCULTAR BLOQUE VIEJO -->
-        <template id="hide_old_invoice_fields" inherit_id="portal.portal_my_details">
-
-            <!-- Oculta el primer bloque que tenga ese título -->
-            <xpath expr="//h5[contains(text(),'Datos de Facturación')][1]/.." position="attributes">
-                <attribute name="style">display:none;</attribute>
-            </xpath>
-
-        </template>
-
-
-
-        <!-- BLOQUE NUEVO -->
         <template id="portal_mx_extra_fields" inherit_id="portal.portal_my_details">
 
             <xpath expr="//button[@type='submit']/.." position="before">

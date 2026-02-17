@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <data>
-        <record id="account.portal_my_details_fields" model="ir.ui.view">
-            <field name="active" eval="False"/>
-        </record>
-    </data>
-</odoo>

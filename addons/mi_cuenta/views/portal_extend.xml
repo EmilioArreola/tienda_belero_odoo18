@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="portal_mx_extra_fields" inherit_id="portal.portal_my_details">
+
+            <xpath expr="//button[@type='submit']/.." position="before">
+
+                <div class="row mt-4">
+                    <div class="col-12 mb-3">
+                        <h5 style="color:#555;">Datos de Facturación</h5>
+                        <hr/>
+                    </div>
+
+                    <div class="col-xl-6 mb-3">
+                        <label class="col-form-label">RFC</label>
+                        <input type="text" name="vat" class="form-control"
+                               t-att-value="partner.vat or ''"/>
+                    </div>
+
+                    <div class="col-xl-6 mb-3">
+                        <label class="col-form-label">Régimen Fiscal</label>
+                        <select name="x_regimen_fiscal" class="form-select">
+                            <option value="">Seleccionar...</option>
+                            <t t-foreach="partner._fields['x_regimen_fiscal'].selection" t-as="opt">
+                                <option t-att-value="opt[0]"
+                                        t-att-selected="partner.x_regimen_fiscal == opt[0]">
+                                    <t t-esc="opt[1]"/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+
+                    <div class="col-xl-6 mb-3">
+                        <label class="col-form-label">Uso CFDI</label>
+                        <select name="x_uso_cfdi" class="form-select">
+                            <option value="">Seleccionar...</option>
+                            <t t-foreach="partner._fields['x_uso_cfdi'].selection" t-as="opt">
+                                <option t-att-value="opt[0]"
+                                        t-att-selected="partner.x_uso_cfdi == opt[0]">
+                                    <t t-esc="opt[1]"/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+
+                </div>
+
+            </xpath>
+
+        </template>
+
+    </data>
+</odoo>

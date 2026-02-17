@@ -2,6 +2,12 @@
 <odoo>
     <data>
 
+        <!-- Desactivar la vista duplicada del portal -->
+        <record id="portal.portal_my_details_fields" model="ir.ui.view">
+            <field name="active">False</field>
+        </record>
+
+        <!-- Tu sección de Datos de Facturación -->
         <template id="portal_mx_extra_fields" inherit_id="portal.portal_my_details">
 
             <xpath expr="//button[@type='submit']/.." position="before">

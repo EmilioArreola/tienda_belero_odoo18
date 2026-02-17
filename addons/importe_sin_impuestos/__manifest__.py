@@ -7,6 +7,8 @@
     'depends': ['sale', 'base'],
     'data': [
         'views/res_config_settings_views.xml',
+        'report/sale_report_templates.xml',
+        'views/sale_portal_templates.xml',
     ],
     'installable': True,
     'license': 'LGPL-3',

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_saleorder_document_inherit_belero_tax" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//t[@t-set='address']" position="before">
+            <t t-set="belero_tax_inc" t-value="res_company.env['ir.config_parameter'].sudo().get_param('belero.tax_included')"/>
+        </xpath>
+
+        <xpath expr="//td[@name='td_priceunit']/span" position="replace">
+            <t t-if="belero_tax_inc">
+                <span t-esc="line.price_total / (line.product_uom_qty or 1.0)" 
+                      t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+            </t>
+            <t t-else="">
+                <span t-field="line.price_unit"/>
+            </t>
+        </xpath>
+
+        <xpath expr="//td[@name='td_subtotal']/span[@t-field='line.price_subtotal']" position="replace">
+            <span t-if="belero_tax_inc" t-field="line.price_total"/>
+            <span t-else="" t-field="line.price_subtotal"/>
+        </xpath>
+
+        <xpath expr="//th[@name='th_subtotal']" position="replace">
+            <th name="th_subtotal" class="text-end">
+                <span t-if="belero_tax_inc">Importe (con imp.)</span>
+                <span t-else="">Importe</span>
+            </th>
+        </xpath>
+    </template>
+</odoo>

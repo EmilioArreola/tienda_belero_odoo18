@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="sale_order_portal_content_belero_final" inherit_id="sale.sale_order_portal_content">
+        
+        <xpath expr="//div[@id='portal_sale_content']" position="before">
+            <t t-set="belero_tax_inc" t-value="env['ir.config_parameter'].sudo().get_param('belero.tax_included') == 'True'"/>
+        </xpath>
+
+        <xpath expr="//table[@id='sales_order_table']//div[@t-field='line.price_unit']" position="replace">
+            <div t-if="belero_tax_inc" class="text-end">
+                <span t-esc="line.price_total / (line.product_uom_qty or 1.0)" 
+                      t-options='{"widget": "monetary", "display_currency": sale_order.currency_id}'/>
+            </div>
+            <div t-else="" t-field="line.price_unit" class="text-end"/>
+        </xpath>
+
+        <xpath expr="//span[hasclass('oe_order_line_price_subtotal')]" position="replace">
+            <span t-if="belero_tax_inc" t-field="line.price_total" class="oe_order_line_price_subtotal"/>
+            <span t-else="" t-field="line.price_subtotal" class="oe_order_line_price_subtotal"/>
+        </xpath>
+
+        <xpath expr="//table[@name='sale_order_totals_table']" position="replace">
+            <table class="table table-sm" name="sale_order_totals_table">
+                <t t-if="belero_tax_inc">
+                    <tr class="border-black">
+                        <td><strong>Total</strong></td>
+                        <td class="text-end">
+                            <strong><span t-field="sale_order.amount_total"/></strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="text-end text-muted small">
+                            </td>
+                    </tr>
+                </t>
+                <t t-else="">
+                    <tr class="border-black">
+                        <td><strong>Subtotal</strong></td>
+                        <td class="text-end"><span t-field="sale_order.amount_untaxed"/></td>
+                    </tr>
+                    <tr>
+                        <td>Impuestos</td>
+                        <td class="text-end"><span t-field="sale_order.amount_tax"/></td>
+                    </tr>
+                    <tr class="border-black">
+                        <td><strong>Total</strong></td>
+                        <td class="text-end"><strong><span t-field="sale_order.amount_total"/></strong></td>
+                    </tr>
+                </t>
+            </table>
+        </xpath>
+    </template>
+</odoo>

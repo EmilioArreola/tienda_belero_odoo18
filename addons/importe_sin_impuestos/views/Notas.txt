@@ -1,0 +1,2 @@
+Esto es para mostrar el IVA con cantidad bajo el total:
+<em>(IVA incluido: <span t-field="sale_order.amount_tax"/>)</em>

@@ -9,4 +9,6 @@
     'post_init_hook': 'post_init_hook', # La función mágica
     'installable': True,
     'license': 'LGPL-3',
+    'icon': '/edita_conversacion/static/description/icon.png',
+
 }

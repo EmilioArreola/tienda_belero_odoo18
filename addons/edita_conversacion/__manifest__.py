@@ -4,7 +4,7 @@
     'summary': 'Personalización de marca para el chat y sistema Belero',
     'category': 'Social',
     'author': 'SA',
-    'depends': ['mail'],
+    'depends': ['base', 'mail', 'mail_bot'],
     'data': [],
     'post_init_hook': 'post_init_hook', # La función mágica
     'installable': True,

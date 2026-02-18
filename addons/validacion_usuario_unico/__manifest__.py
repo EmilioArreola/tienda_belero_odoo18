@@ -3,7 +3,7 @@
     'version': '18.0.1.0.0',
     'summary': 'Evita la creación de usuarios con datos duplicados (Email/DNI)',
     'category': 'Administration',
-    'author': 'Tu Nombre o Empresa',
+    'author': 'SmApps',
     'depends': ['base','contacts','website_sale',],
     'data': [
         'views/res_partner_views.xml',

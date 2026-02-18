@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="sale_order_portal_content_belero_final" inherit_id="sale.sale_order_portal_content">
+    <template id="belero_portal_final_toggle_v25" inherit_id="sale.sale_order_portal_content">
         
-        <xpath expr="//div[@id='portal_sale_content']" position="before">
-            <t t-set="belero_tax_inc" t-value="env['ir.config_parameter'].sudo().get_param('belero.tax_included') == 'True'"/>
+        <xpath expr="//div[@id='introduction']" position="before">
+            <t t-set="global_belero" t-value="env['ir.config_parameter'].sudo().get_param('belero.tax_included') == 'True'"/>
+            <t t-set="tax_mode" t-value="request.params.get('tax_mode', 'on')"/>
+            <t t-set="belero_tax_inc" t-value="global_belero and tax_mode == 'on'"/>
         </xpath>
 
-        <xpath expr="//table[@id='sales_order_table']//div[@t-field='line.price_unit']" position="replace">
-            <div t-if="belero_tax_inc" class="text-end">
-                <span t-esc="line.price_total / (line.product_uom_qty or 1.0)" 
-                      t-options='{"widget": "monetary", "display_currency": sale_order.currency_id}'/>
-            </div>
-            <div t-else="" t-field="line.price_unit" class="text-end"/>
+        <xpath expr="//th[@id='taxes_header']" position="attributes">
+            <attribute name="t-if">not belero_tax_inc</attribute>
+        </xpath>
+        <xpath expr="//td[@id='taxes']" position="attributes">
+            <attribute name="t-if">not belero_tax_inc</attribute>
         </xpath>
 
         <xpath expr="//span[hasclass('oe_order_line_price_subtotal')]" position="replace">
@@ -19,35 +20,45 @@
             <span t-else="" t-field="line.price_subtotal" class="oe_order_line_price_subtotal"/>
         </xpath>
 
-        <xpath expr="//table[@name='sale_order_totals_table']" position="replace">
-            <table class="table table-sm" name="sale_order_totals_table">
-                <t t-if="belero_tax_inc">
-                    <tr class="border-black">
-                        <td><strong>Total</strong></td>
-                        <td class="text-end">
-                            <strong><span t-field="sale_order.amount_total"/></strong>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="text-end text-muted small">
+        <xpath expr="//div[@id='total']" position="replace">
+            <div id="total" name="total" class="row" style="page-break-inside: avoid;">
+                <div class="col-xs-7 col-md-5 ms-auto">
+                    <table t-if="belero_tax_inc" class="table table-sm border-0">
+                        <tr style="border-style: none;">
+                            <td class="border-0"><strong>Total</strong></td>
+                            <td class="text-end border-0">
+                                <strong><span t-field="sale_order.amount_total"/></strong>
                             </td>
-                    </tr>
-                </t>
-                <t t-else="">
-                    <tr class="border-black">
-                        <td><strong>Subtotal</strong></td>
-                        <td class="text-end"><span t-field="sale_order.amount_untaxed"/></td>
-                    </tr>
-                    <tr>
-                        <td>Impuestos</td>
-                        <td class="text-end"><span t-field="sale_order.amount_tax"/></td>
-                    </tr>
-                    <tr class="border-black">
-                        <td><strong>Total</strong></td>
-                        <td class="text-end"><strong><span t-field="sale_order.amount_total"/></strong></td>
-                    </tr>
-                </t>
-            </table>
+                        </tr>
+                    </table>
+                    <t t-else="" t-call="sale.sale_order_portal_content_totals_table"/>
+                </div>
+            </div>
+        </xpath>
+
+        <xpath expr="//div[@id='content']" position="inside">
+            <div t-if="global_belero" class="d-print-none mt-5 pt-4 border-top">
+                <div class="card bg-light">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Preferencia de precios</h6>
+                            <small class="text-muted">Cambia cómo se muestran los impuestos en esta orden.</small>
+                        </div>
+                        <t t-if="tax_mode == 'on'">
+                            <a t-attf-href="/my/orders/#{sale_order.id}?tax_mode=off&amp;access_token=#{sale_order.access_token}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fa fa-eye-slash"/> Ver desglose de IVA
+                            </a>
+                        </t>
+                        <t t-else="">
+                            <a t-attf-href="/my/orders/#{sale_order.id}?tax_mode=on&amp;access_token=#{sale_order.access_token}" 
+                               class="btn btn-primary" style="background-color: #e0873a; border-color: #e0873a;">
+                                <i class="fa fa-eye"/> Ver precios finales
+                            </a>
+                        </t>
+                    </div>
+                </div>
+            </div>
         </xpath>
     </template>
 </odoo>

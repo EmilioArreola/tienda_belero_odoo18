@@ -4,7 +4,7 @@
     'summary': 'Configuración global para mostrar importes con o sin impuestos',
     'category': 'Sales',
     'author': 'SmApps',
-    'depends': ['sale', 'base'],
+    'depends': ['sale', 'base', 'portal'],
     'data': [
         'views/res_config_settings_views.xml',
         'report/sale_report_templates.xml',

@@ -3,57 +3,52 @@
     <template id="report_saleorder_document_inherit_belero_tax" inherit_id="sale.report_saleorder_document">
         
         <xpath expr="//t[@t-set='address']" position="before">
-            <t t-set="belero_tax_inc" t-value="res_company.env['ir.config_parameter'].sudo().get_param('belero.tax_included') == 'True'"/>
+            <t t-set="global_belero" t-value="res_company.env['ir.config_parameter'].sudo().get_param('belero.tax_included') == 'True'"/>
+            <t t-set="belero_tax_inc" t-value="global_belero and doc.belero_tax_mode == 'on'"/>
         </xpath>
 
-        <xpath expr="//th[@name='th_subtotal']" position="replace">
-            <th name="th_subtotal" class="text-end">
-                <span t-if="belero_tax_inc">Importe (con imp.)</span>
-                <span t-else="">Importe</span>
-            </th>
-        </xpath>
+        <xpath expr="//th[@name='th_taxes']" position="attributes"><attribute name="t-if">not belero_tax_inc</attribute></xpath>
+        <xpath expr="//td[@name='td_taxes']" position="attributes"><attribute name="t-if">not belero_tax_inc</attribute></xpath>
+        
+        <xpath expr="//th[@name='th_subtotal']" position="attributes"><attribute name="t-if">not belero_tax_inc</attribute></xpath>
+        <xpath expr="//td[@name='td_subtotal']" position="attributes"><attribute name="t-if">not belero_tax_inc</attribute></xpath>
+        
+        <xpath expr="//th[@name='th_priceunit']" position="attributes"><attribute name="t-if">not belero_tax_inc</attribute></xpath>
+        <xpath expr="//td[@name='td_priceunit']" position="attributes"><attribute name="t-if">not belero_tax_inc</attribute></xpath>
 
-        <xpath expr="//td[@name='td_subtotal']/span[@t-field='line.price_subtotal']" position="replace">
-            <span t-if="belero_tax_inc" t-field="line.price_total"/>
-            <span t-else="" t-field="line.price_subtotal"/>
+        <xpath expr="//th[@name='th_priceunit']" position="after">
+            <th t-if="belero_tax_inc" name="th_priceunit_belero" class="text-end">Precio Unit.</th>
         </xpath>
-
-        <xpath expr="//td[@name='td_priceunit']/span" position="replace">
-            <t t-if="belero_tax_inc">
+        <xpath expr="//td[@name='td_priceunit']" position="after">
+            <td t-if="belero_tax_inc" name="td_priceunit_belero" class="text-end">
                 <span t-esc="line.price_total / (line.product_uom_qty or 1.0)" 
                       t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
-            </t>
-            <t t-else="">
-                <span t-field="line.price_unit"/>
-            </t>
+            </td>
         </xpath>
 
-        <xpath expr="//div[@name='so_total_summary']" position="replace">
-            <div name="so_total_summary" class="row justify-content-end">
+        <xpath expr="//th[@name='th_subtotal']" position="after">
+            <th t-if="belero_tax_inc" name="th_subtotal_belero" class="text-end">Importe</th>
+        </xpath>
+        <xpath expr="//td[@name='td_subtotal']" position="after">
+            <td t-if="belero_tax_inc" name="td_subtotal_belero" class="text-end">
+                <span t-field="line.price_total"/>
+            </td>
+        </xpath>
+
+        <xpath expr="//div[@name='so_total_summary']" position="attributes">
+            <attribute name="t-if">not belero_tax_inc</attribute>
+        </xpath>
+
+        <xpath expr="//div[@name='so_total_summary']" position="after">
+            <div t-if="belero_tax_inc" name="so_total_summary_belero" class="row justify-content-end">
                 <div class="col-4">
                     <table class="table table-sm table-borderless">
-                        <t t-if="belero_tax_inc">
-                            <tr class="border-black o_total">
-                                <td><strong>Total</strong></td>
-                                <td class="text-end">
-                                    <strong t-field="doc.amount_total"/>
-                                </td>
-                            </tr>
-                        </t>
-                        <t t-else="">
-                            <tr class="border-black o_subtotal">
-                                <td><strong>Subtotal</strong></td>
-                                <td class="text-end"><span t-field="doc.amount_untaxed"/></td>
-                            </tr>
-                            <tr class="o_taxes">
-                                <td>Impuestos</td>
-                                <td class="text-end"><span t-field="doc.amount_tax"/></td>
-                            </tr>
-                            <tr class="border-black o_total">
-                                <td><strong>Total</strong></td>
-                                <td class="text-end"><strong t-field="doc.amount_total"/></td>
-                            </tr>
-                        </t>
+                        <tr class="o_total">
+                            <td style="padding: 8px 15px !important;"><strong>Total</strong></td>
+                            <td class="text-end" style="padding: 8px 15px !important;">
+                                <strong t-field="doc.amount_total"/>
+                            </td>
+                        </tr>
                     </table>
                 </div>
             </div>

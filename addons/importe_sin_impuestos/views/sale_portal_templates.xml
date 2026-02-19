@@ -4,8 +4,7 @@
         
         <xpath expr="//div[@id='introduction']" position="before">
             <t t-set="global_belero" t-value="env['ir.config_parameter'].sudo().get_param('belero.tax_included') == 'True'"/>
-            <t t-set="tax_mode" t-value="request.params.get('tax_mode', 'on')"/>
-            <t t-set="belero_tax_inc" t-value="global_belero and tax_mode == 'on'"/>
+            <t t-set="belero_tax_inc" t-value="global_belero and sale_order.belero_tax_mode == 'on'"/>
         </xpath>
 
         <xpath expr="//th[@id='taxes_header']" position="attributes">
@@ -20,10 +19,14 @@
             <span t-else="" t-field="line.price_subtotal" class="oe_order_line_price_subtotal"/>
         </xpath>
 
-        <xpath expr="//div[@id='total']" position="replace">
-            <div id="total" name="total" class="row" style="page-break-inside: avoid;">
+        <xpath expr="//div[@id='total']" position="attributes">
+            <attribute name="t-if">not belero_tax_inc</attribute>
+        </xpath>
+        
+        <xpath expr="//div[@id='total']" position="after">
+            <div t-if="belero_tax_inc" id="total_belero" class="row" style="page-break-inside: avoid;">
                 <div class="col-xs-7 col-md-5 ms-auto">
-                    <table t-if="belero_tax_inc" class="table table-sm border-0">
+                    <table class="table table-sm border-0">
                         <tr style="border-style: none;">
                             <td class="border-0"><strong>Total</strong></td>
                             <td class="text-end border-0">
@@ -31,29 +34,44 @@
                             </td>
                         </tr>
                     </table>
-                    <t t-else="" t-call="sale.sale_order_portal_content_totals_table"/>
                 </div>
             </div>
         </xpath>
 
         <xpath expr="//div[@id='content']" position="inside">
+            <style>
+                .btn-belero-action {
+                    background-color: #e0873a !important;
+                    border-color: #e0873a !important;
+                    color: white !important;
+                    transition: all 0.3s ease !important;
+                }
+                .btn-belero-action:hover {
+                    background-color: #c4722e !important; /* Naranja más oscuro al pasar el mouse */
+                    border-color: #c4722e !important;
+                    transform: translateY(-1px); /* Pequeño efecto de elevación */
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                }
+            </style>
+
             <div t-if="global_belero" class="d-print-none mt-5 pt-4 border-top">
-                <div class="card bg-light">
+                <div class="card bg-light shadow-sm border-0">
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="mb-0">Preferencia de precios</h6>
-                            <small class="text-muted">Cambia cómo se muestran los impuestos en esta orden.</small>
+                            <small class="text-muted">Cambia cómo se muestran los impuestos en esta orden y en el PDF.</small>
                         </div>
-                        <t t-if="tax_mode == 'on'">
-                            <a t-attf-href="/my/orders/#{sale_order.id}?tax_mode=off&amp;access_token=#{sale_order.access_token}" 
-                               class="btn btn-outline-secondary">
-                                <i class="fa fa-eye-slash"/> Ver desglose de IVA
+                        
+                        <t t-if="sale_order.belero_tax_mode == 'on'">
+                            <a t-attf-href="/my/orders/#{sale_order.id}/toggle_tax?tax_mode=off&amp;access_token=#{sale_order.access_token}" 
+                            class="btn btn-primary btn-belero-action">
+                                <i class="fa fa-eye me-2"/> Ver desglose de impuestos
                             </a>
                         </t>
                         <t t-else="">
-                            <a t-attf-href="/my/orders/#{sale_order.id}?tax_mode=on&amp;access_token=#{sale_order.access_token}" 
-                               class="btn btn-primary" style="background-color: #e0873a; border-color: #e0873a;">
-                                <i class="fa fa-eye"/> Ver precios finales
+                            <a t-attf-href="/my/orders/#{sale_order.id}/toggle_tax?tax_mode=on&amp;access_token=#{sale_order.access_token}" 
+                            class="btn btn-primary btn-belero-action">
+                                <i class="fa fa-eye-slash me-2"/> Ver precios netos
                             </a>
                         </t>
                     </div>

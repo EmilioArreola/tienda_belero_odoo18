@@ -95,5 +95,38 @@
                 ) else ['|', ('user_id', '=', user.id), ('user_id', '=', False)]
             </field>
         </record>
+
+        <record model="ir.module.category" id="category_crm_custom">
+            <field name="name">Gestión de CRM (Personalizado)</field>
+            <field name="description">Controla la visibilidad de iniciativas y oportunidades.</field>
+            <field name="sequence">15</field>
+        </record>
+
+        <record id="group_crm_ver_todo" model="res.groups">
+            <field name="name">Ver todas las Oportunidades</field>
+            <field name="category_id" ref="category_crm_custom"/>
+        </record>
+
+        <record id="rule_crm_personal" model="ir.rule">
+            <field name="name">CRM: Ver solo propias (Restricción)</field>
+            <field name="model_id" ref="crm.model_crm_lead"/>
+            <field name="domain_force">['|', ('user_id', '=', user.id), ('user_id', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <record id="rule_crm_ver_todo_permiso" model="ir.rule">
+            <field name="name">CRM: Ver todas (Acceso Total)</field>
+            <field name="model_id" ref="crm.model_crm_lead"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('permisos_usuarios.group_crm_ver_todo'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
     </data>
 </odoo>

@@ -2,52 +2,53 @@
 <odoo>
     <data>
 
+        <template id="portal_mx_disable_old_vat" inherit_id="portal.portal_my_details_fields">
+            <xpath expr="//input[@name='vat']/.." position="replace"/>
+        </template>
+
         <template id="portal_mx_extra_fields" inherit_id="portal.portal_my_details">
-
             <xpath expr="//button[@type='submit']/.." position="before">
-
+                
                 <div class="row mt-4">
                     <div class="col-12 mb-3">
                         <h5 style="color:#555;">Datos de Facturación</h5>
                         <hr/>
                     </div>
 
-                    <div class="col-xl-6 mb-3">
+                    <div t-attf-class="mb-3 col-xl-6 #{error.get('vat') and 'o_has_error' or ''}">
                         <label class="col-form-label">RFC</label>
-                        <input type="text" name="vat" class="form-control"
-                               t-att-value="partner.vat or ''"/>
+                        <input type="text" name="vat" t-attf-class="form-control #{error.get('vat') and 'is-invalid' or ''}"
+                               t-att-value="vat or partner.vat or ''"/>
                     </div>
 
-                    <div class="col-xl-6 mb-3">
+                    <div t-attf-class="mb-3 col-xl-6 #{error.get('x_regimen_fiscal') and 'o_has_error' or ''}">
                         <label class="col-form-label">Régimen Fiscal</label>
-                        <select name="x_regimen_fiscal" class="form-select">
+                        <select name="x_regimen_fiscal" t-attf-class="form-select #{error.get('x_regimen_fiscal') and 'is-invalid' or ''}">
                             <option value="">Seleccionar...</option>
                             <t t-foreach="partner._fields['x_regimen_fiscal'].selection" t-as="opt">
                                 <option t-att-value="opt[0]"
-                                        t-att-selected="partner.x_regimen_fiscal == opt[0]">
+                                        t-att-selected="((x_regimen_fiscal or partner.x_regimen_fiscal) == opt[0]) and 'selected' or None">
                                     <t t-esc="opt[1]"/>
                                 </option>
                             </t>
                         </select>
                     </div>
 
-                    <div class="col-xl-6 mb-3">
+                    <div t-attf-class="mb-3 col-xl-6 #{error.get('x_uso_cfdi') and 'o_has_error' or ''}">
                         <label class="col-form-label">Uso CFDI</label>
-                        <select name="x_uso_cfdi" class="form-select">
+                        <select name="x_uso_cfdi" t-attf-class="form-select #{error.get('x_uso_cfdi') and 'is-invalid' or ''}">
                             <option value="">Seleccionar...</option>
                             <t t-foreach="partner._fields['x_uso_cfdi'].selection" t-as="opt">
                                 <option t-att-value="opt[0]"
-                                        t-att-selected="partner.x_uso_cfdi == opt[0]">
+                                        t-att-selected="((x_uso_cfdi or partner.x_uso_cfdi) == opt[0]) and 'selected' or None">
                                     <t t-esc="opt[1]"/>
                                 </option>
                             </t>
                         </select>
                     </div>
-
                 </div>
 
             </xpath>
-
         </template>
 
     </data>

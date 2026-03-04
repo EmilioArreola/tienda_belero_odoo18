@@ -10,6 +10,7 @@
 
     'data': [
         'views/portal_extend.xml',
+        'views/res_partner_views.xml', # Añadimos esta línea
     ],
 
     'installable': True,
